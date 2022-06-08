@@ -9,6 +9,8 @@ This demonstration of global synchronization relies only on [SST-Core](https://g
 
 
 # Objectives
+- [ ] literature search for instances of this problem
+- [ ] identify underlying mathematical or logical conditions that trigger this problem in distributed systems
 - [ ] identify minimum features for C++ components needed to create this problem
 - [ ] identify minimum size of graph (links, components) to observe the issue
 - [ ] identify metrics needed to identify the existence of the problem
