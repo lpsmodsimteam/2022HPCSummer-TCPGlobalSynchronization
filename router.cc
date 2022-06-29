@@ -25,7 +25,7 @@ router::router( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     commPort = new SST::Link*[numPorts];
 
     for (int i = 0; i < numPorts; ++i) {
-        std::string port = "commPort" + std::to_string(i); 
+        std::string port = "commPort" + std::to_string(i);
         commPort[i] = configureLink(port, new SST::Event::Handler<router, int>(this, &router::commHandler, i));
 
         if ( !commPort[i] ) {

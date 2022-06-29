@@ -31,7 +31,7 @@ public:
     )
 
     SST_ELI_DOCUMENT_PORTS(
-        {"commPort", "A pointer to ports for connecting the router to flows.", {"StringEvent"}}
+        {"commPort%d", "A pointer to ports for connecting the router to flows.", {"StringEvent"}}
     )
 
 private:
