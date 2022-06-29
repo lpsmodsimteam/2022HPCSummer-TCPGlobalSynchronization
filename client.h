@@ -31,7 +31,7 @@ public:
     )
 
     SST_ELI_DOCUMENT_PORTS(
-        {"commPort", "Port that packets and acknowledgements are sent across.", {"PacketEvent"}}
+        {"commPort", "Port that packets and acknowledgements are sent across.", {"StringEvent"}}
     )
 
 private:

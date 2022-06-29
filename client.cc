@@ -1,5 +1,4 @@
 #include <sst/core/sst_config.h>
-#include <sst/core/simulation.h>
 #include "client.h"
 #include <sst/core/interfaces/stringEvent.h>
 
