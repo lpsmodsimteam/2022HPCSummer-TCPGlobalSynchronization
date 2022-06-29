@@ -32,5 +32,5 @@ sst.Link("Flow_One").connect(
     (client_one, "commPort", "1ms"), (router, "commPort0", "1ms")
 )
 sst.Link("Flow_Two").connect(
-   (client_two, "commPort1", "1ms"), (router, "commPort1", "1ms")
+    (client_two, "commPort", "1ms"), (router, "commPort1", "1ms")
 )
