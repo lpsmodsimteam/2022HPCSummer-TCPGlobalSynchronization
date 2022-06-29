@@ -13,7 +13,7 @@ public:
     int verbose_level;
     bool tick ( SST::Cycle_t currentCycle ); 
 
-    void commHandler(SST::Event *ev);
+    void commHandler(SST::Event *ev, int port);
 
     SST_ELI_REGISTER_COMPONENT(
         router,
@@ -36,9 +36,9 @@ public:
 
 private:
     SST::Output output;
-    SST::Link *commPort; 
-    int numPorts;
-   
+    SST::Link **commPort; 
+    int numPorts; 
+
     std::string clock;
     
 };

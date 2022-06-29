@@ -7,7 +7,7 @@ using SST::Interfaces::StringEvent;
 client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
     // Initialize Parameters
     clock = params.find<std::string>("tickFreq", "1s");
-    verbose_level = params.find<int64_t>("verbose_level");
+    verbose_level = params.find<int64_t>("verbose_level", 1);
 
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT ); 
 
@@ -28,3 +28,6 @@ bool client::tick( SST::Cycle_t currentCycle ) {
 
     return(false);
 }
+
+void client::commHandler(SST::Event *ev) {}
+

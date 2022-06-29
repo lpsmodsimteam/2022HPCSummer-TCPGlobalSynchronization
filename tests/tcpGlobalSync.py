@@ -19,18 +19,18 @@ client_one.addParams(
 )
 
 
-# client_two = sst.Component("Client_2", "tcpGlobalSync.client")
-# client_two.addParams(
-#    {
-#        "tickFreq": "1s",
-#        "timeout": "10",
-#        "verbose_level": "1",
-#    }
-# )
+client_two = sst.Component("Client_2", "tcpGlobalSync.client")
+client_two.addParams(
+    {
+        "tickFreq": "1s",
+        "timeout": "10",
+        "verbose_level": "1",
+    }
+)
 
 sst.Link("Flow_One").connect(
-    (client_one, "commPort", "1ms"), (router, "commPort", "1ms")
+    (client_one, "commPort", "1ms"), (router, "commPort0", "1ms")
 )
-# sst.Link("Flow_Two").connect(
-#    (client_two, "commPort", "1ms"), (router, "commPort1", "1ms")
-# )
+sst.Link("Flow_Two").connect(
+   (client_two, "commPort1", "1ms"), (router, "commPort1", "1ms")
+)
