@@ -3,6 +3,11 @@
 
 #include <sst/core/component.h>
 #include <sst/core/link.h>
+#include "messageevent.h"
+
+#define IDLE 0
+#define WAITING 1
+#define SENDING 2   
 
 class client : public SST::Component {
 
@@ -28,10 +33,11 @@ public:
         {"tickFreq", "Descript", "1s"},
         {"timeout", "Descript", "100"}, 
         {"verbose_level", "Descript", "1"},
+        {"node_id", "Descript", "1"},
     )
 
     SST_ELI_DOCUMENT_PORTS(
-        {"commPort", "Port that packets and acknowledgements are sent across.", {"StringEvent"}}
+        {"commPort", "Port that frames and acknowledgements are sent across.", {"StringEvent"}}
     )
 
 private:
@@ -39,8 +45,19 @@ private:
     SST::Link *commPort;  
 
     std::string clock;
-    int time_out; 
-    
+    int timeout; 
+
+    void checkForSend(SST::Cycle_t currentCycle);
+    int frames_to_send;
+    int current_frame;
+    int acks_received;
+    int start_send_cycle;
+    int window_size;
+    void sendMessage(MessageType type, StatusType status, int node, int frame);
+
+    int client_state;
+    int node_id;
+     
 };
 
 #endif

@@ -3,6 +3,8 @@
 
 #include <sst/core/component.h>
 #include <sst/core/link.h>
+#include "messageevent.h"
+#include <queue>
 
 class router : public SST::Component {
 
@@ -26,7 +28,7 @@ public:
 
     SST_ELI_DOCUMENT_PARAMS(
         {"tickFreq", "Descript", "1s"},
-        {"numPorts", "Descript", "2"},   
+        {"numPorts", "Descript", "1"},   
         {"verbose_level", "Descript", "1"},
     )
 
@@ -40,7 +42,8 @@ private:
     int numPorts; 
 
     std::string clock;
-    
+
+    std::queue<Message> infQueue; 
 };
 
 #endif
