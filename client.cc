@@ -19,6 +19,8 @@ client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     start_send_cycle = 0;
     current_frame = 0;
     acks_received = 0;
+    timer_start = 0;
+    test = 1;
 
     registerClock(clock, new SST::Clock::Handler<client>(this, &client::tick));
     commPort = configureLink("commPort", new SST::Event::Handler<client>(this, &client::commHandler));
@@ -31,7 +33,7 @@ client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
 client::~client() {
 
 }
-int test = 1;
+
 bool client::tick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 1, 0, "%ld\n", getCurrentSimTimeMilli());
     std::cout << current_frame << std::endl;
@@ -40,10 +42,11 @@ bool client::tick( SST::Cycle_t currentCycle ) {
         if (test) {
             checkForSend(currentCycle);
             test = 0;
-        }
-        
+        }  
         // RNG to send
-        // Reset current frame to 0
+        // Reset current frame and acks received to 0
+        //current_frame = 0;
+        //acks_received = 0; 
     } else if (client_state == WAITING) {
         output.verbose(CALL_INFO, 3, 0, "Waiting State\n");
         // Do nothing? Collect statistics? Decrement time out (and in sending as well)
@@ -60,16 +63,21 @@ bool client::tick( SST::Cycle_t currentCycle ) {
             if (start_send_cycle + window_size == currentCycle) {
                 client_state = WAITING;
             }
-        } else {
-            output.verbose(CALL_INFO, 3, 0, "Responding to Ack with next frame\n");
+        } else if (current_frame < frames_to_send) {
+            output.verbose(CALL_INFO, 4, 0, "Responding to Ack with next frame\n");
             // Send message
             sendMessage(FRAME, NEW, node_id, current_frame);
             current_frame++;
             // Waiting
             client_state = WAITING;
-        } 
+        } else {
+            output.verbose(CALL_INFO, 4, 0, "Responding to Ack by waiting as all frames are sent out\n");
+            client_state = WAITING; // Changing this to idle will cause issues.
+            // Keeping as waiting allows us to wait for timeout.
+            // May need to change this to idle who knows
+        }
     } else {
-        output.fatal(CALL_INFO, -1, "Client is in a unknown state.\n");
+        output.fatal(CALL_INFO, -1, "Client is in a unknown state. Error!\n");
     } 
 
     return(false);
@@ -95,6 +103,9 @@ void client::commHandler(SST::Event *ev) {
                     // Received acks for all frames that were sent out.
                     if (acks_received == frames_to_send) { // (A)
                         output.verbose(CALL_INFO, 4, 0, "Packet Succesfully Sent\n");
+                        current_frame = 0;
+                        acks_received = 0;
+                        timer_start = 0;
                         client_state = IDLE;
                     }
                 }
@@ -116,6 +127,9 @@ void client::checkForSend(SST::Cycle_t currentCycle) {
 
     // Set send_cycle = next cycle for sending initial W frames.
     start_send_cycle = currentCycle + 1;
+
+    // Start timer for timeouts
+    timer_start = currentCycle + 1;
 
     // Change state to sending
     client_state = SENDING;

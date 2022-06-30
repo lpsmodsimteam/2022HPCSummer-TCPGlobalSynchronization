@@ -53,11 +53,14 @@ private:
     int acks_received;
     int start_send_cycle;
     int window_size;
+    int timer_start;
     void sendMessage(MessageType type, StatusType status, int node, int frame);
 
     int client_state;
     int node_id;
      
+
+    int test;
 };
 
 #endif
