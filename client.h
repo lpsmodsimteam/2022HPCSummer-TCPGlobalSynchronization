@@ -7,7 +7,10 @@
 
 #define IDLE 0
 #define WAITING 1
-#define SENDING 2   
+#define SENDING 2
+
+#define SEND_NEW 0
+#define SEND_DUP 1
 
 class client : public SST::Component {
 
@@ -56,6 +59,7 @@ private:
     int timer_start;
     void sendMessage(MessageType type, StatusType status, int node, int frame);
 
+    int send_state;
     int client_state;
     int node_id;
      

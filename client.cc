@@ -3,14 +3,13 @@
 
 client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
     // Initialize Parameters
-    clock = params.find<std::string>("tickFreq", "1ms");
+    clock = params.find<std::string>("tickFreq", "1s");
     verbose_level = params.find<int64_t>("verbose_level", 1);
     timeout = params.find<int64_t>("timeout", 1);
     node_id = params.find<int64_t>("node_id", 1);
 
-    window_size = 4;
+    window_size = 5;
    
-
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT ); 
 
     // Initialize Variables;
@@ -20,6 +19,7 @@ client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     current_frame = 0;
     acks_received = 0;
     timer_start = 0;
+    send_state = NEW;
     test = 1;
 
     registerClock(clock, new SST::Clock::Handler<client>(this, &client::tick));
@@ -50,23 +50,47 @@ bool client::tick( SST::Cycle_t currentCycle ) {
     } else if (client_state == WAITING) {
         output.verbose(CALL_INFO, 3, 0, "Waiting State\n");
         // Do nothing? Collect statistics? Decrement time out (and in sending as well)
+
+        // check for timeout
+        if (currentCycle > timer_start + timeout) {
+            // Check how many acks have been sent
+            std::cout << "Timeout reached" << std::endl;
+            // Prepare to send (frames_to_send - acks_received frames) as dupes.
+            // current_frame = frames_to_send - acks_received ?
+            current_frame = frames_to_send - (frames_to_send - acks_received); // Set back current_frame to where dupes should be sent.
+            // sending_state = RETRANSMISSIONS 
+            send_state = SEND_DUP;
+            // reset time_start
+            timer_start = currentCycle;
+            start_send_cycle = currentCycle;
+            client_state = SENDING;
+        }
     } else if (client_state == SENDING) {
         output.verbose(CALL_INFO, 3, 0, "Sending State\n");
         // Sends out initial window size # of messages without waiting for acks. (Sliding Window)
-        if (start_send_cycle + window_size > currentCycle) {
+        if (start_send_cycle + window_size >= currentCycle) {
             output.verbose(CALL_INFO, 4, 0, "Sending Initial Frames\n");
             // Send Message
-            sendMessage(FRAME, NEW, node_id, current_frame);
+            if (send_state == SEND_NEW) {
+                sendMessage(FRAME, NEW, node_id, current_frame);
+            } else {
+                sendMessage(FRAME, DUP, node_id, current_frame);
+            } 
             current_frame++;
             // keep state until all initialization messages sent out.
             // client_state = SENDING;
-            if (start_send_cycle + window_size == currentCycle) {
+            // all check that retransmissions dont spill over frames_to_send due to window size
+            if (start_send_cycle + window_size == currentCycle || current_frame >= frames_to_send) {
                 client_state = WAITING;
             }
         } else if (current_frame < frames_to_send) {
             output.verbose(CALL_INFO, 4, 0, "Responding to Ack with next frame\n");
             // Send message
-            sendMessage(FRAME, NEW, node_id, current_frame);
+            if (send_state == SEND_NEW) {
+                sendMessage(FRAME, NEW, node_id, current_frame);
+            } else {
+                sendMessage(FRAME, DUP, node_id, current_frame);
+            } 
             current_frame++;
             // Waiting
             client_state = WAITING;
@@ -106,10 +130,10 @@ void client::commHandler(SST::Event *ev) {
                         current_frame = 0;
                         acks_received = 0;
                         timer_start = 0;
+                        send_state = NEW;
                         client_state = IDLE;
                     }
-                }
-                
+                }   
                 break;
         }
     }

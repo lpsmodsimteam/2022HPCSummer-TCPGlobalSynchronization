@@ -3,7 +3,7 @@
 
 router::router( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
     // Initialize Parameters
-    clock = params.find<std::string>("tickFreq", "1ms");
+    clock = params.find<std::string>("tickFreq", "1s");
     verbose_level = params.find<int64_t>("verbose_level", 1);
     numPorts = params.find<int64_t>("numPorts", 1);
 
@@ -23,7 +23,7 @@ router::router( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
         commPort[i] = configureLink(port, new SST::Event::Handler<router, int>(this, &router::commHandler, i));
 
         if ( !commPort[i] ) {
-            output.fatal(CALL_INFO, -1, "Commport%d failed.", i);
+            output.fatal(CALL_INFO, -1, "Commport%d failed.\n", i);
         }
     }  
 }
@@ -34,7 +34,7 @@ router::~router() {
 
 bool router::tick( SST::Cycle_t currentCycle ) {
     
-    if (currentCycle == 100) {
+    if (currentCycle == 10) {
         primaryComponentOKToEndSim();
         return(true);
     }
@@ -45,6 +45,7 @@ bool router::tick( SST::Cycle_t currentCycle ) {
 
         msg.type = ACK; // Change msg to ack
         commPort[msg.node]->send(new MessageEvent(msg)); // Send ack back to node
+        output.verbose(CALL_INFO, 3, 0, "Sent ACK for Frame %d for Node %d\n", msg.id, msg.node);
 
         infQueue.pop();
     }
