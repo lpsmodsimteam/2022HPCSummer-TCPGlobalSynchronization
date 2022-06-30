@@ -36,7 +36,7 @@ client::~client() {
 
 bool client::tick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 1, 0, "%ld\n", getCurrentSimTimeMilli());
-    std::cout << current_frame << std::endl;
+    output.verbose(CALL_INFO, 1, 0, "Current Frame: %d\n", current_frame);
     if (client_state == IDLE) {
         output.verbose(CALL_INFO, 3, 0, "Idle State\n");
         if (test) {
@@ -54,7 +54,7 @@ bool client::tick( SST::Cycle_t currentCycle ) {
         // check for timeout
         if (currentCycle > timer_start + timeout) {
             // Check how many acks have been sent
-            std::cout << "Timeout reached" << std::endl;
+            std::cout << "---------------------TIMEOUT" << std::endl;
             // Prepare to send (frames_to_send - acks_received frames) as dupes.
             // current_frame = frames_to_send - acks_received ?
             current_frame = frames_to_send - (frames_to_send - acks_received); // Set back current_frame to where dupes should be sent.

@@ -34,7 +34,7 @@ router::~router() {
 
 bool router::tick( SST::Cycle_t currentCycle ) {
     
-    if (currentCycle == 10) {
+    if (currentCycle == 100) {
         primaryComponentOKToEndSim();
         return(true);
     }
@@ -45,7 +45,7 @@ bool router::tick( SST::Cycle_t currentCycle ) {
 
         msg.type = ACK; // Change msg to ack
         commPort[msg.node]->send(new MessageEvent(msg)); // Send ack back to node
-        output.verbose(CALL_INFO, 3, 0, "Sent ACK for Frame %d for Node %d\n", msg.id, msg.node);
+        output.verbose(CALL_INFO, 3, 0, "Sent ACK for Frame %d for Node %d\nWhich is %d (NEW 0/DUP 1)\n", msg.id, msg.node, msg.status);
 
         infQueue.pop();
     }
