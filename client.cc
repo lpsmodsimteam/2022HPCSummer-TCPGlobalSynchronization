@@ -19,7 +19,7 @@ client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     current_frame = 0;
     acks_received = 0;
     timer_start = 0;
-    send_state = NEW;
+    send_state = SEND_NEW;
     test = 1;
 
     registerClock(clock, new SST::Clock::Handler<client>(this, &client::tick));
@@ -35,8 +35,8 @@ client::~client() {
 }
 
 bool client::tick( SST::Cycle_t currentCycle ) {
-    output.verbose(CALL_INFO, 1, 0, "%ld\n", getCurrentSimTimeMilli());
-    output.verbose(CALL_INFO, 1, 0, "Current Frame: %d\n", current_frame);
+    output.verbose(CALL_INFO, 2, 0, "%ld\n", getCurrentSimTimeMilli());
+    output.verbose(CALL_INFO, 2, 0, "Current Frame: %d\n", current_frame);
     if (client_state == IDLE) {
         output.verbose(CALL_INFO, 3, 0, "Idle State\n");
         if (test) {
@@ -54,7 +54,7 @@ bool client::tick( SST::Cycle_t currentCycle ) {
         // check for timeout
         if (currentCycle > timer_start + timeout) {
             // Check how many acks have been sent
-            std::cout << "---------------------TIMEOUT" << std::endl;
+            //---------std::cout << "---------------------TIMEOUT" << std::endl;
             // Prepare to send (frames_to_send - acks_received frames) as dupes.
             // current_frame = frames_to_send - acks_received ?
             current_frame = frames_to_send - (frames_to_send - acks_received); // Set back current_frame to where dupes should be sent.
@@ -71,7 +71,7 @@ bool client::tick( SST::Cycle_t currentCycle ) {
         if (start_send_cycle + window_size >= currentCycle) {
             output.verbose(CALL_INFO, 4, 0, "Sending Initial Frames\n");
             // Send Message
-            if (send_state == SEND_NEW) {
+            if (send_state == SEND_NEW) { 
                 sendMessage(FRAME, NEW, node_id, current_frame);
             } else {
                 sendMessage(FRAME, DUP, node_id, current_frame);

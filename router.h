@@ -15,6 +15,8 @@ public:
     int verbose_level;
     bool tick ( SST::Cycle_t currentCycle ); 
 
+    void setup();
+
     void commHandler(SST::Event *ev, int port);
 
     SST_ELI_REGISTER_COMPONENT(
@@ -44,6 +46,9 @@ private:
     std::string clock;
 
     std::queue<Message> infQueue; 
+
+    float goodput;
+    float throughput;
 };
 
 #endif

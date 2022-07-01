@@ -13,7 +13,7 @@ client_zero = sst.Component("Client_0", "tcpGlobalSync.client")
 client_zero.addParams(
     {
         "tickFreq": "1s",
-        "timeout": "20",
+        "timeout": "25",
         "node_id": "0",
         "verbose_level": "4",
     }
@@ -24,7 +24,7 @@ client_one = sst.Component("Client_1", "tcpGlobalSync.client")
 client_one.addParams(
     {
         "tickFreq": "1s",
-        "timeout": "15",
+        "timeout": "25",
         "node_id": "1",
         "verbose_level": "4",
     }

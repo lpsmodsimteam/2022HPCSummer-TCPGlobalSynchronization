@@ -5,7 +5,7 @@ router::router( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     // Initialize Parameters
     clock = params.find<std::string>("tickFreq", "1s");
     verbose_level = params.find<int64_t>("verbose_level", 1);
-    numPorts = params.find<int64_t>("numPorts", 1);
+    numPorts = params.find<int64_t>("numPorts", 1); 
 
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT); 
 
@@ -32,8 +32,18 @@ router::~router() {
 
 }
 
+void router::setup() {
+    goodput = 0;
+    throughput = 0;
+}
+
 bool router::tick( SST::Cycle_t currentCycle ) {
-    
+    output.verbose(CALL_INFO, 2, 0, "Goodput: %f\nThroughput: %f\n", goodput, throughput);
+
+    // Potential statistics
+    std::cout << infQueue.size() << std::endl;
+    std::cout << goodput / throughput << std::endl;
+
     if (currentCycle == 100) {
         primaryComponentOKToEndSim();
         return(true);
@@ -45,7 +55,14 @@ bool router::tick( SST::Cycle_t currentCycle ) {
 
         msg.type = ACK; // Change msg to ack
         commPort[msg.node]->send(new MessageEvent(msg)); // Send ack back to node
-        output.verbose(CALL_INFO, 3, 0, "Sent ACK for Frame %d for Node %d\nWhich is %d (NEW 0/DUP 1)\n", msg.id, msg.node, msg.status);
+        output.verbose(CALL_INFO, 3, 0, "Sent ACK for Frame %d for Node %d\nWhich is %d (NEW 1/DUP 0)\n", msg.id, msg.node, msg.status);
+
+        if (msg.status == NEW) {
+            goodput--;
+            throughput--;
+        } else {
+            throughput--;
+        }
 
         infQueue.pop();
     }
@@ -59,6 +76,14 @@ void router::commHandler(SST::Event *ev, int port) {
         switch (me->msg.type) {
             case FRAME:
                 output.verbose(CALL_INFO, 3, 0, "Received frame %d from node %d\n", me->msg.id, me->msg.node);
+
+                if (me->msg.status == NEW) {
+                    goodput++;
+                    throughput++;
+                } else {
+                    throughput++;
+                }
+
                 infQueue.push(me->msg); // Push message onto queue.
                 break;
 
