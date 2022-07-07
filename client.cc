@@ -7,12 +7,12 @@ client::client( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     verbose_level = params.find<int64_t>("verbose_level", 1);
     timeout = params.find<int64_t>("timeout", 1);
     node_id = params.find<int64_t>("node_id", 1);
-
-    window_size = 5;
-   
+    window_size = params.find<int64_t>("window_size", 1);
+    
+    // Initialize console output
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT ); 
 
-    // Initialize Variables;
+    // Initialize Variables
     client_state = IDLE;
     frames_to_send = 0;
     start_send_cycle = 0;
@@ -35,7 +35,7 @@ client::~client() {
 }
 
 bool client::tick( SST::Cycle_t currentCycle ) {
-    output.verbose(CALL_INFO, 2, 0, "%ld\n", getCurrentSimTimeMilli());
+    //output.verbose(CALL_INFO, 2, 0, "%ld\n", getCurrentSimTimeMilli());
     output.verbose(CALL_INFO, 2, 0, "Current Frame: %d\n", current_frame);
     if (client_state == IDLE) {
         output.verbose(CALL_INFO, 3, 0, "Idle State\n");
@@ -54,7 +54,7 @@ bool client::tick( SST::Cycle_t currentCycle ) {
         // check for timeout
         if (currentCycle > timer_start + timeout) {
             // Check how many acks have been sent
-            //---------std::cout << "---------------------TIMEOUT" << std::endl;
+            std::cout << "---------------------TIMEOUT" << std::endl;
             // Prepare to send (frames_to_send - acks_received frames) as dupes.
             // current_frame = frames_to_send - acks_received ?
             current_frame = frames_to_send - (frames_to_send - acks_received); // Set back current_frame to where dupes should be sent.
@@ -67,6 +67,9 @@ bool client::tick( SST::Cycle_t currentCycle ) {
         }
     } else if (client_state == SENDING) {
         output.verbose(CALL_INFO, 3, 0, "Sending State\n");
+
+        timer_start = currentCycle; // Reset timeout
+
         // Sends out initial window size # of messages without waiting for acks. (Sliding Window)
         if (start_send_cycle + window_size >= currentCycle) {
             output.verbose(CALL_INFO, 4, 0, "Sending Initial Frames\n");
@@ -147,7 +150,7 @@ void client::checkForSend(SST::Cycle_t currentCycle) {
     // Rng to see if packets need to be sent
 
     // Rng to check how many frame need to be sent
-    frames_to_send = 10;
+    frames_to_send = 40;
 
     // Set send_cycle = next cycle for sending initial W frames.
     start_send_cycle = currentCycle + 1;

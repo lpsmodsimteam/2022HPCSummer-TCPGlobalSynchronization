@@ -24,31 +24,33 @@ public:
         "tcpGlobalSync",
         "router",
         SST_ELI_ELEMENT_VERSION( 1, 0, 0 ),
-        "description",
+        "Router receives messages from clients and stores them into a queue to be processed.",
         COMPONENT_CATEGORY_UNCATEGORIZED
     )
 
     SST_ELI_DOCUMENT_PARAMS(
-        {"tickFreq", "Descript", "1s"},
-        {"numPorts", "Descript", "1"},   
-        {"verbose_level", "Descript", "1"},
+        {"tickFreq", "Frequency at which one frame in the queue is processed.", "1s"},
+        {"numPorts", "Number of ports the router has (Matches number of clients in simulation)", "1"},   
+        {"verbose_level", "Verbosity level of console output.", "1"},
+        {"queueSize", "Size of the router's input queue", "50"},
     )
 
     SST_ELI_DOCUMENT_PORTS(
-        {"commPort%d", "A pointer to ports for connecting the router to flows.", {"StringEvent"}}
+        {"commPort%d", "A pointer to ports for connecting the router to flows.", {"MessageEvent"}}
     )
 
 private:
     SST::Output output;
-    SST::Link **commPort; 
-    int numPorts; 
+    SST::Link **commPort;   // A pointer to a set of ports for the router. 
+    int numPorts;   // Number of ports the router has.
 
-    std::string clock;
+    std::string clock; // Frequency the router updates at.
 
-    std::queue<Message> infQueue; 
+    std::queue<Message> msgQueue; // Queue for incoming frames 
+    int queueSize;  // Size of Message queue
 
-    float goodput;
-    float throughput;
+    float goodput;  // Amount of new frames that travel the link to the router.
+    float throughput;   // Total amount of frames that travel the link to the router.
 };
 
 #endif

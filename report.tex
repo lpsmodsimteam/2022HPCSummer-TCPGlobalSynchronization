@@ -1,0 +1,77 @@
+\documentclass{article}
+
+%graphics
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+
+\usepackage{float}
+
+% margins of 1 inch:
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{9.5in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\begin{document}
+
+    % https://stackoverflow.com/a/3408428/1164295
+    \begin{minipage}[h]{\textwidth}
+        \title{2022 Future Computing Summer Internship Project:\\(Congestion Collapse)}
+        \author{Nicholas Schantz\footnote{nickjohnschantz@gmail.com}\ , 
+        Melissa Jost\footnote{anemail@domain.com}}
+        \date{\today}
+            \maketitle
+        \begin{abstract}
+            TCP Global Synchronization is an issue involving the TCP protocol in which concurrent packet loss leads to multiple nodes lowering their congestion window synchronously.
+        \end{abstract}
+    \end{minipage}
+
+\ \\
+% see https://en.wikipedia.org/wiki/George_H._Heilmeier#Heilmeier's_Catechism
+
+%\maketitle
+
+\section{Project Description} % what problem is being addressed? 
+
+
+
+\section{Motivation} % Why does this work matter? Who cares? If you're successful, what difference does it make?
+
+
+
+\section{Prior work} % what does this build on?
+
+
+\section{How to do the thing}
+
+The software developed to respond to this challenge was run on one laptop.
+
+The software is available on (https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization)
+
+\section{Progress}
+
+
+\section{Result} % conclusion/summary
+
+
+
+\begin{thebibliography}{9}
+\bibitem{texbook}
+Donald E. Knuth (1986) \emph{The \TeX{} Book}, Addison-Wesley Professional.
+
+\bibitem{lamport94}
+Leslie Lamport (1994) \emph{\LaTeX: a document preparation system}, Addison
+Wesley, Massachusetts, 2nd ed.
+\end{thebibliography}
+
+\end{document}

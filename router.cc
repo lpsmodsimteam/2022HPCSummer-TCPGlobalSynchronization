@@ -6,6 +6,7 @@ router::router( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     clock = params.find<std::string>("tickFreq", "1s");
     verbose_level = params.find<int64_t>("verbose_level", 1);
     numPorts = params.find<int64_t>("numPorts", 1); 
+    queueSize = params.find<int64_t>("queueSize", 50);
 
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT); 
 
@@ -41,22 +42,24 @@ bool router::tick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 2, 0, "Goodput: %f\nThroughput: %f\n", goodput, throughput);
 
     // Potential statistics
-    std::cout << infQueue.size() << std::endl;
-    std::cout << goodput / throughput << std::endl;
+    output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size()); 
+    std::cout << goodput / throughput << std::endl; 
 
+    // Hardstop for simulation
     if (currentCycle == 100) {
         primaryComponentOKToEndSim();
         return(true);
-    }
-    //output.verbose(CALL_INFO, 1, 0, "Testing...\n"); 
+    } 
 
-    if (!infQueue.empty()) {
-        Message msg = infQueue.front(); // Grab message at front
+    // Check if queue is empty.
+    if (!msgQueue.empty()) {
+        Message msg = msgQueue.front(); // Grab message at front
 
         msg.type = ACK; // Change msg to ack
         commPort[msg.node]->send(new MessageEvent(msg)); // Send ack back to node
         output.verbose(CALL_INFO, 3, 0, "Sent ACK for Frame %d for Node %d\nWhich is %d (NEW 1/DUP 0)\n", msg.id, msg.node, msg.status);
 
+        // Update statistics.
         if (msg.status == NEW) {
             goodput--;
             throughput--;
@@ -64,7 +67,7 @@ bool router::tick( SST::Cycle_t currentCycle ) {
             throughput--;
         }
 
-        infQueue.pop();
+        msgQueue.pop(); // Remove message from queue.
     }
 
     return(false);
@@ -77,14 +80,18 @@ void router::commHandler(SST::Event *ev, int port) {
             case FRAME:
                 output.verbose(CALL_INFO, 3, 0, "Received frame %d from node %d\n", me->msg.id, me->msg.node);
 
-                if (me->msg.status == NEW) {
-                    goodput++;
-                    throughput++;
-                } else {
-                    throughput++;
+                if (msgQueue.size() + 1 > queueSize) {
+                    output.verbose(CALL_INFO, 3, 0, "Dropped frame %d from node %d\n", me->msg.id, me->msg.node);
+                } else {             
+                    // Update statistics
+                    if (me->msg.status == NEW) {
+                        goodput++;
+                        throughput++;
+                    } else {
+                        throughput++;
+                    }
+                   msgQueue.push(me->msg); // Push message onto queue.
                 }
-
-                infQueue.push(me->msg); // Push message onto queue.
                 break;
 
             case ACK:
