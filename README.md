@@ -13,7 +13,7 @@ This demonstration of global synchronization relies only on [SST-Core](https://g
 - [x] identify underlying mathematical or logical conditions that trigger this problem in distributed systems
 - [x] identify minimum features for C++ components needed to create this problem
 - [x] identify minimum size of graph (links, components) to observe the issue
-- [ ] identify metrics needed to identify the existence of the problem
+- [x] identify metrics needed to identify the existence of the problem
 - [ ] measure the metrics and demonstrate the detection of the problem
 - [ ] use the metrics to identify the problem at various scales (e.g., 10 nodes, 100 nodes, 1000 nodes)
 
