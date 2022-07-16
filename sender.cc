@@ -23,9 +23,15 @@ sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     counter = 0;
     drop_counter = 0;
     send_delay = 0;
-
-    output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT);
  
+    // Enabling SST Console Output
+    output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT);
+
+    // Create a string for each sender's filename to output data to.
+    std::string fileName = "sender_data" + std::to_string(node_id) + ".csv";
+    csvout.init("CSVOUT", 1, 0, SST::Output::FILE, fileName);
+    csvout.output("Time,Send Rate\n");
+
     // Clock
     registerClock(clock, new SST::Clock::Handler<sender>(this, &sender::tick));
 
@@ -48,7 +54,6 @@ void sender::finish() {
         std::cout << rate_drop[i] << std::endl;
     }*/
     std::cout << "End Data For " << node_id << std::endl;
-    
 }
 
 /**
@@ -70,6 +75,7 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
         // Statistic Info
         send_rate_data[counter] = curr_send_rate;
         counter++;
+        csvout.output("%ld,%d\n", getCurrentSimTime(), curr_send_rate);
 
         packets_to_send = curr_send_rate;
 

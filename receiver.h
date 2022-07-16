@@ -45,6 +45,7 @@ public:
 
 private:
     SST::Output output; // SST Object for console output.
+    SST::Output csvout;
     SST::Link **port;   // Pointer to multiple ports.
 
     std::string clock;  // Frequency component will tick at. Takes in UnitAlgebra.

@@ -18,8 +18,12 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     num_nodes = params.find<int64_t>("num_nodes", 1);
     window_size = params.find<int64_t>("window_size", 100);
 
-    // Enabling SST Output
+    // Enabling SST Console Output
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT);
+
+    // Enabling SST CSV File Output
+    csvout.init("CSVOUT", 1, 0, SST::Output::FILE, "receiver_data.csv");
+    csvout.output("Time,Queue Size,Packet Loss,Link Utilization,Global Sync Detected\n");
 
     registerAsPrimaryComponent();
     primaryComponentDoNotEndSim();
@@ -57,9 +61,13 @@ receiver::~receiver() {
 }
 
 void receiver::setup() {
-    tracked_nodes[0] = 0;
+    /**tracked_nodes[0] = 0;
     tracked_nodes[1] = 0;
-    tracked_nodes[2] = 0;
+    tracked_nodes[2] = 0;*/
+    for (int i = 0; i < num_nodes; i++) {
+        tracked_nodes[i] = 0;
+        std::cout << tracked_nodes[i] << std::endl;
+    }
 }
 
 /**
@@ -95,11 +103,6 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
         }
     }
 
-    if (currentCycle == 300) {
-        primaryComponentOKToEndSim();
-        return(true);
-    }
-
     // Check if message queue is empty
     if (!msgQueue.empty()) {
         // Process messages in queue.
@@ -114,6 +117,13 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
 
     link_utilization = packets_processed / (float) process_rate;
     packets_processed = 0;
+
+    csvout.output("%ld,%ld,%d,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect);
+
+    if (currentCycle == 300) {
+        primaryComponentOKToEndSim();
+        return(true);
+    }
 
     return(false);
 }

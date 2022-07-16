@@ -1,5 +1,5 @@
 # Tell Make that these are NOT files, just targets
-.PHONY: all install test uninstall clean sst-info sst-help viz_makefile viz_dot black mypy help 
+.PHONY: all install test uninstall clean sst-info sst-help viz_makefile viz_dot plot black mypy help 
 
 # shortcut for running anything inside the singularity container
 CONTAINER=/usr/local/bin/additions.sif

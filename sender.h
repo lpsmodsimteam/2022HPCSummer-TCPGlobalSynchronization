@@ -40,6 +40,7 @@ public:
 
 private:
     SST::Output output;     // SST Object for console output.
+    SST::Output csvout;     
     SST::Link *port;        // Pointer to a port.
     SST::TimeConverter *tc; // Required for converted sim time and component time.
 
