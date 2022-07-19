@@ -78,9 +78,9 @@ void receiver::setup() {
  * @return false 
  */
 bool receiver::tick( SST::Cycle_t currentCycle ) {
-    output.verbose(CALL_INFO, 2, 0, "SimTime: %ld\n", getCurrentSimTime());
-    output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size());
-    output.verbose(CALL_INFO, 2, 0, "Global Synchronization Percentage: %f\n\n", globsync_detect);
+    //output.verbose(CALL_INFO, 2, 0, "SimTime: %ld\n", getCurrentSimTime());
+    //output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size());
+    //output.verbose(CALL_INFO, 2, 0, "Global Synchronization Percentage: %f\n\n", globsync_detect);
 
     // Statistic Info 
     //^^^std::cout << msgQueue.size() << std::endl;
@@ -118,6 +118,10 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     link_utilization = packets_processed / (float) process_rate;
     packets_processed = 0;
 
+
+    // Data output and File output
+    output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %d\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\n\n", 
+        getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect);
     csvout.output("%ld,%ld,%d,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect);
 
     if (currentCycle == 300) {

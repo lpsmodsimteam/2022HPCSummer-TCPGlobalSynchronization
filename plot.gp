@@ -28,7 +28,7 @@ set multiplot layout 3,2 title "TCP Global Synchronization"
     plot "receiver_data.csv" using 1:4 title "Link Utilization" with lines
 
     set title "Global Sync Detection"
-    plot "receiver_data.csv" using 1:5 title "Global Sync Detect" with lines
+    plot "receiver_data.csv" using 1:5 title "Global Sync Detect" with points
 
     set title "Send Rates"
     plot for [i=0:(ARG1-1)] "sender_data".i.".csv" using 1:2 title "Node".i with lines 

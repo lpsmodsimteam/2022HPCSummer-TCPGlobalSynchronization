@@ -6,19 +6,52 @@
 #include <queue>
 #include "packetevent.h"
 
-#define NUM_NODES 3
+#define NUM_NODES 3 //*!< Number of senders that are connected to the receiver.
 
+/**
+ * @brief Receiver Component Class. Receives packets from a sender and processes them. 
+ * 
+ */
 class receiver : public SST::Component {
 public:
+
+    /**
+     * @brief Construct a new receiver component for the simulation composition.
+     * Occurs before the simulation starts.
+     * 
+     * @param id Component ID tracked by the simulator.
+     * @param params Parameters passed in via the Python driver file.
+     */
     receiver( SST::ComponentId_t id, SST::Params& params );
+
+    /**
+     * @brief Deconstruct the receiver component. Occurs after the simulation is finished.
+     * 
+     */
     ~receiver();
 
+    /**
+     * @brief Contains the receiver's behavior and runs at its clock frequency.
+     * 
+     * @param currentCycle Current cycle of the component.
+     * @return true Component is finished running.
+     * @return false Component is not finished running.
+     */
     bool tick ( SST::Cycle_t currentCycle ); 
 
+    /**
+     * @brief Handles packet information received from a sender component.
+     * 
+     * @param ev PacketEvent that the component received.
+     */
     void eventHandler(SST::Event *ev);
 
-    void setup();
+    void setup(); // May be able to remove?
 
+    /**
+     * \cond 
+     * Currently ignoring SST_ELI Macros as they break doxygen
+     */
     SST_ELI_REGISTER_COMPONENT(
         receiver,       // Component Name
         "tcpGlobSync",   // Element Name
@@ -42,31 +75,34 @@ public:
     SST_ELI_DOCUMENT_PORTS(
         {"port%d", "Port that packets are sent across.", {"PacketEvent"}}
     ) 
+    /**
+     * \endcond 
+     */
 
 private:
-    SST::Output output; // SST Object for console output.
-    SST::Output csvout;
-    SST::Link **port;   // Pointer to multiple ports.
+    SST::Output output; //!< SST Output object for printing to the console.
+    SST::Output csvout; //!< SST Output object for printing to a csv file.
+    SST::Link **port;   //!< Pointer to an array of port pointers. Allows for variable number of ports to be dynamically allocated.
 
-    std::string clock;  // Frequency component will tick at. Takes in UnitAlgebra.
-    std::queue<Packet> msgQueue;    // Queue for packets.
-    int queue_size;     // Size of queue.
-    int process_rate;   // Amount of packets that can processed per tick.
-    int verbose_level;  // Verbosity level of console output.
-    int num_nodes;      // Number of connected senders.
+    std::string clock;  //!< Frequency component will tick at. Takes in Unit Algebra string. (i.e. "1ms").
+    std::queue<Packet> msgQueue;    //!< Queue for packets.
+    int queue_size;     //!< Size of packet queue.
+    int process_rate;   //!< Amount of packets that can be processed per tick.
+    int verbose_level;  //!< Verbosity level of console output.
+    int num_nodes;      //!< Number of connected senders.
     int num_resets;     //
 
-    float link_utilization;     // Aggregate link utilization of the receiver.
-    float packets_processed;    // Packets processed per tick.
-    int packet_loss;    // Number of packets loss. 
+    float link_utilization;     //!< Aggregate link utilization of the receiver.
+    float packets_processed;    //!< Packets processed per tick.
+    int packet_loss;    //!< Number of packets loss. 
 
-    int window_size;    // Window size for synchronization detection. 
-    int sampling_start_time; // Simulator Time in which sampling occurs. 
-    bool sampling_status;
-    bool already_sampled;
-    int tracked_nodes[NUM_NODES];
-    int nodes_limited;
-    float globsync_detect;
+    int window_size;            //!< Window size for synchronization detection. 
+    int sampling_start_time;    //!< Simulator Time in which sampling occurs. 
+    bool sampling_status;       //!< Is sampling occuring or not.
+    bool already_sampled;       //!< Determines if the behavior has already been detected before the window size is reached.
+    int tracked_nodes[NUM_NODES]; //!!!! DYNAMICALLY ALLOCATE>
+    int nodes_limited;          //!< Number of nodes that have limited their transmission rate in a window.
+    float globsync_detect;      //!< Metric if the global synchronization behavior has occured.
 };
 
 #endif
