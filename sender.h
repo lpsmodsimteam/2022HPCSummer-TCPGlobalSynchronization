@@ -26,13 +26,7 @@ public:
      * 
      */
     ~sender();
-
-    /**
-     * @brief Runs before component is deconstructed. Frees up dynamically allocated arrays that stores node's log info.
-     * 
-     */
-    void finish(); 
-
+ 
     /**
      * @brief Contains the sender's behavior and runs at its clock frequency.
      * 
@@ -94,7 +88,7 @@ private:
      * @param id ID of the packet
      * @param delay send delay of the packet.
      */
-    inline void sendPacket(int id, int delay);  //!< Constructs and sends a packet via the port.
+    inline void sendPacket(int id, int delay);  
 
     int send_rate_data[300];
     int counter = 0;

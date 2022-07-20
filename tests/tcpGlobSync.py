@@ -1,3 +1,5 @@
+# Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
+
 import sst  # Use SST Library
 
 # Creating a sender component from element tcpGlobSync (tcpGlobSync.sender) named "Sender Zero."

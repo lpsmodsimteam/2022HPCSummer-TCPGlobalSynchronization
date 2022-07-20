@@ -3,12 +3,6 @@
 #include "receiver.h"
 #include <math.h>
 
-/**
- * @brief Constructs a new receiver component for the SST composition.
- * 
- * @param id Component's id for the SST simulator.
- * @param params Used to grab parameters from the python driver file.
- */
 receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id) {
 
     // Parameters
@@ -54,7 +48,7 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     // Pointer to an array of port pointers.
     port = new SST::Link*[num_nodes];
 
-    // Configure all ports to different link.
+    // Configure all ports to a different link.
     for (int i = 0; i < num_nodes; ++i) {
         std::string strport = "port" + std::to_string(i);
         port[i] = configureLink(strport, new SST::Event::Handler<receiver>(this, &receiver::eventHandler));
@@ -71,35 +65,27 @@ receiver::~receiver() {
 
 }
 
-void receiver::setup() {
-    /**tracked_nodes[0] = 0;
-    tracked_nodes[1] = 0;
-    tracked_nodes[2] = 0;*/
-    for (int i = 0; i < num_nodes; i++) {
-        tracked_nodes[i] = 0;
-        std::cout << tracked_nodes[i] << std::endl;
-    }
+/**
+ * @brief Dynamically allocate an array to keep track of what sender components have limited transmission rates during a window of time.
+ * 
+ */
+void receiver::setup() {  
+    tracked_nodes = (int*) calloc(num_nodes, sizeof(int));
 }
 
 /**
- * @brief 
+ * @brief Free up array allocated in setup. 
  * 
- * @param currentCycle 
- * @return true 
- * @return false 
  */
+void receiver::finish() {
+    free(tracked_nodes);
+}
+ 
 bool receiver::tick( SST::Cycle_t currentCycle ) {
-    //output.verbose(CALL_INFO, 2, 0, "SimTime: %ld\n", getCurrentSimTime());
-    //output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size());
-    //output.verbose(CALL_INFO, 2, 0, "Global Synchronization Percentage: %f\n\n", globsync_detect);
-
-    // Statistic Info 
-    //^^^std::cout << msgQueue.size() << std::endl;
-    //^^^std::cout << packet_loss << std::endl;
-    //^^^std::cout << link_utilization * 100 << std::endl; 
-    //^^^std::cout << globsync_detect << std::endl;
-
-    
+    output.verbose(CALL_INFO, 2, 0, "SimTime: %ld\n", getCurrentSimTime());
+    output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size());
+    output.verbose(CALL_INFO, 2, 0, "Global Synchronization Percentage: %f\n\n", globsync_detect);
+   
     if (sampling_status == true && (getCurrentSimTimeMilli() >= sampling_start_time + window_size)) {
         output.verbose(CALL_INFO, 2, 0, "Ending Sampling\n");
         already_sampled = false;
@@ -118,7 +104,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
             if (msgQueue.empty()) {
                 break; // If the queue becomes empty during processing, break out.
             }
-        packets_processed++; //  
+        packets_processed++;  
         msgQueue.pop(); // "Process" the packet and remove it from queue.
         }
     }
@@ -126,9 +112,8 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     link_utilization = packets_processed / (float) process_rate;
     packets_processed = 0;
 
-
     // Data output and File output
-    output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %d\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\n\n", 
+    output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\n\n", 
         getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect);
     csvout.output("%ld,%ld,%d,%f,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg);
     output.output(CALL_INFO, "Queue Average: %f, Prev Queue Average: %f\n", queue_avg, prev_avg);

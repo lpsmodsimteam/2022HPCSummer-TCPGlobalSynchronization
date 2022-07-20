@@ -6,8 +6,6 @@
 #include <queue>
 #include "packetevent.h"
 
-#define NUM_NODES 3 //*!< Number of senders that are connected to the receiver.
-
 /**
  * @brief Receiver Component Class. Receives packets from a sender and processes them. 
  * 
@@ -46,7 +44,17 @@ public:
      */
     void eventHandler(SST::Event *ev);
 
-    void setup(); // May be able to remove?
+    /**
+     * @brief Runs after all components have been constructed but before the simulation begins.
+     * 
+     */
+    void setup();
+
+    /**
+     * @brief Runs after the component is finished but before all components are deconstructed.
+     * 
+     */
+    void finish();
 
     /**
      * \cond 
@@ -100,7 +108,8 @@ private:
     int sampling_start_time;    //!< Simulator Time in which sampling occurs. 
     bool sampling_status;       //!< Is sampling occuring or not.
     bool already_sampled;       //!< Determines if the behavior has already been detected before the window size is reached.
-    int tracked_nodes[NUM_NODES]; //!!!! DYNAMICALLY ALLOCATE>
+    //int tracked_nodes[NUM_NODES]; //!!!! DYNAMICALLY ALLOCATE>
+    int *tracked_nodes;
     int nodes_limited;          //!< Number of nodes that have limited their transmission rate in a window.
     float globsync_detect;      //!< Metric if the global synchronization behavior has occured.
     
