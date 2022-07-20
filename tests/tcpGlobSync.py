@@ -1,15 +1,15 @@
-import sst # Use SST Library
+import sst  # Use SST Library
 
 # Creating a sender component from element tcpGlobSync (tcpGlobSync.sender) named "Sender Zero."
 sender_zero = sst.Component("Sender Zero", "tcpGlobSync.sender")
 sender_zero.addParams(
     {
-        "tickFreq": "1s", # frequency component updates at.
-        "low_send_rate": "10", # minimum send rate of sender and what it will limit its send rate to.
-        "max_send_rate": "50", # maximum send rate of sender
-        "verbose_level": "1", # level of console verbosity.
-        "node_id": "0", # id of node.
-        "starting_cycle": "1", # cycle in which component begins to send packets.
+        "tickFreq": "1s",  # frequency component updates at.
+        "low_send_rate": "10",  # minimum send rate of sender and what it will limit its send rate to.
+        "max_send_rate": "50",  # maximum send rate of sender
+        "verbose_level": "1",  # level of console verbosity.
+        "node_id": "0",  # id of node.
+        "starting_cycle": "1",  # cycle in which component begins to send packets.
     }
 )
 
@@ -17,8 +17,8 @@ sender_one = sst.Component("Sender One", "tcpGlobSync.sender")
 sender_one.addParams(
     {
         "tickFreq": "1s",
-        "low_send_rate": "5",
-        "max_send_rate": "999",
+        "low_send_rate": "10",
+        "max_send_rate": "50",
         "verbose_level": "1",
         "node_id": "1",
         "starting_cycle": "5",
@@ -40,12 +40,12 @@ sender_two.addParams(
 receiver = sst.Component("Receiver Node", "tcpGlobSync.receiver")
 receiver.addParams(
     {
-        "tickFreq": "1s", # frequency component updates at.
-        "process_rate": "100", # number of packets consumed per tick.
-        "queue_size": "145", # size of queue.
-        "verbose_level": "1", # level of console verbosity.
-        "num_nodes": "3", # number of nodes that will connect to receiver.
-        "window_size": "100", # window size (in sim time) for global sync detection.
+        "tickFreq": "1s",  # frequency component updates at.
+        "process_rate": "100",  # number of packets consumed per tick.
+        "queue_size": "200",  # size of queue.
+        "verbose_level": "2",  # level of console verbosity.
+        "num_nodes": "3",  # number of nodes that will connect to receiver.
+        "window_size": "100",  # window size (in sim time) for global sync detection.
     }
 )
 

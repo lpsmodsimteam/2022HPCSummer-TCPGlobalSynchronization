@@ -103,6 +103,11 @@ private:
     int tracked_nodes[NUM_NODES]; //!!!! DYNAMICALLY ALLOCATE>
     int nodes_limited;          //!< Number of nodes that have limited their transmission rate in a window.
     float globsync_detect;      //!< Metric if the global synchronization behavior has occured.
+    
+    bool enable_wred;
+    float queue_avg;
+    float prev_avg;
+    int weighted;
 };
 
 #endif
