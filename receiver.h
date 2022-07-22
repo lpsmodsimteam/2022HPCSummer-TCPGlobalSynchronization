@@ -3,6 +3,7 @@
 
 #include <sst/core/component.h>
 #include <sst/core/link.h>
+#include <sst/core/rng/marsaglia.h>
 #include <queue>
 #include "packetevent.h"
 
@@ -113,10 +114,15 @@ private:
     int nodes_limited;          //!< Number of nodes that have limited their transmission rate in a window.
     float globsync_detect;      //!< Metric if the global synchronization behavior has occured.
     
-    bool enable_wred;
-    float queue_avg;
-    float prev_avg;
-    int weighted;
+    bool enable_pred;   //!< Enable psuedo-red algorithm to prevent global synchronization from occurring.
+    float queue_avg;    //!< Average queue depth. 
+    float prev_avg;     //!< Previous average queue depth.
+    float min_pred;     //!< Minimum threshold for pseudo-red algorithm.
+    float max_pred;
+    int count_pred;
+    int64_t rand_seed;
+    SST::RNG::MarsagliaRNG *rng;
+    float rand_num;
 };
 
 #endif

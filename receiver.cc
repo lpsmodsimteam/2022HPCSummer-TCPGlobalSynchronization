@@ -38,7 +38,11 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     //WRED Stuff
     queue_avg = 0;
     prev_avg = 0;
-    enable_wred = 1;
+    enable_pred = 0;
+    rand_num = 0;
+    min_pred = queue_size * 0.45; 
+   
+	rng = new SST::RNG::MarsagliaRNG(10, 123); // Create a Marsaglia RNG with a default value and a random seed.
     
     // Stats 
     packet_loss = 0;
@@ -86,8 +90,14 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size());
     output.verbose(CALL_INFO, 2, 0, "Global Synchronization Percentage: %f\n\n", globsync_detect);
    
+    // Data output and File output
+    output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\n\n", 
+        getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect);
+    csvout.output("%ld,%ld,%d,%f,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg);
+    output.output(CALL_INFO, "Queue Average: %f, Prev Queue Average: %f\n", queue_avg, prev_avg);
+
     if (sampling_status == true && (getCurrentSimTimeMilli() >= sampling_start_time + window_size)) {
-        output.verbose(CALL_INFO, 2, 0, "Ending Sampling\n");
+        output.verbose(CALL_INFO, 2, 0, "Ending Sampling-----------------------------------------------\n");
         already_sampled = false;
         sampling_status = false; 
         sampling_start_time = 0;
@@ -113,10 +123,10 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     packets_processed = 0;
 
     // Data output and File output
-    output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\n\n", 
-        getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect);
-    csvout.output("%ld,%ld,%d,%f,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg);
-    output.output(CALL_INFO, "Queue Average: %f, Prev Queue Average: %f\n", queue_avg, prev_avg);
+    //output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\n\n", 
+    //    getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect);
+    //csvout.output("%ld,%ld,%d,%f,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg);
+    //output.output(CALL_INFO, "Queue Average: %f, Prev Queue Average: %f\n", queue_avg, prev_avg);
 
     if (globsync_detect) {
         globsync_detect = 0;
@@ -135,32 +145,81 @@ void receiver::eventHandler(SST::Event *ev) {
     if (pe != NULL) {
         switch (pe->pack.type) {
             case PACKET: 
-            
-                if (enable_wred) {
-                    queue_avg = prev_avg + (msgQueue.size() - prev_avg) / pow(2, 6);
+                count_pred++; 
+                if (enable_pred) {
+                    /**queue_avg = prev_avg + (msgQueue.size() - prev_avg) / pow(2, 6);
                     prev_avg = queue_avg;
+                    
+                    if (queue_avg < min_pred) {
+                        msgQueue.push(pe->pack);
+                    } else if (queue_avg < queue_size) {
+                       rand_num = (int) (rng->generateNextInt32());
+                       int test = queue_size - msgQueue.size();
+                       rand_num = abs((int)rand_num % test);
+                        if (rand_num == 0) {
+                                output.output("Dropped\n");
+                                Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
+                                port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
+                                packet_loss++;
+                                count_pred = 0;
+                        } else {
+                           msgQueue.push(pe->pack);
+                        }
+                    } else {
+                        Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
+                        port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
+                        packet_loss++; 
+                        count_pred = 0;
+                    }*/
+
+                    if (msgQueue.size() <= queue_size / 2) {
+                        msgQueue.push(pe->pack);
+                    }
+
+                    if (msgQueue.size() > queue_size / 2) {
+                        if (count_pred > 250) {
+                            //try for drop
+                            rand_num = (float) (rng->nextUniform());
+                            if (rand_num < 0.50) {
+                                Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
+                                port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
+                                packet_loss++;
+                                count_pred = 0;
+                            }
+                        } else {
+                            //just enqueue
+                            msgQueue.push(pe->pack);
+                        }
+                    }
+
+                    if (msgQueue.size() + 1 > queue_size) {
+                        Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
+                        port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
+                        packet_loss++;
+                        count_pred = 0;
+                    }
                     //output.output("Average Queue Depth: %f\n", queue_avg);
-                }
-
-                // Check if queue is full
-                if (msgQueue.size() + 1 > queue_size) {
-                    // If so, drop the packet.
-                    output.verbose(CALL_INFO, 3, 0, "Packet Loss from %d\n", pe->pack.node_id);
-
-                    // Send limit message alerting sender that packet was dropped.
-                    Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
-                    port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
-                    packet_loss++; 
                 } else {
-                    // Else, add message to queue
-                    msgQueue.push(pe->pack);
+                    // Check if queue is full
+                    if (msgQueue.size() + 1 > queue_size) {
+                        // If so, drop the packet.
+                        output.verbose(CALL_INFO, 3, 0, "Packet Loss from %d\n", pe->pack.node_id);
+
+                        // Send limit message alerting sender that packet was dropped.
+                        Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
+                        port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
+                        packet_loss++; 
+                    } else {
+                        // Else, add message to queue
+                        msgQueue.push(pe->pack);
+                    }
                 }
                 break;
             case LIMIT:
                 // Receives message that rates are limited, 
                 // Begins sampling for other transmission rate limiting in the user defined window time.
                 if (sampling_status == false && already_sampled == false) {
-                    output.verbose(CALL_INFO, 2, 0, "Started Sampling\n");
+                    output.verbose(CALL_INFO, 2, 0, "Started Sampling. Packet Loss from %d--------------------------------------\n", pe->pack.node_id);
                     sampling_start_time = getCurrentSimTimeMilli(); // Begin Window of Time
                     sampling_status = true; // Start sampling.
                     tracked_nodes[pe->pack.node_id] = 1;
@@ -168,11 +227,11 @@ void receiver::eventHandler(SST::Event *ev) {
                 } 
 
                 if (sampling_status == true && tracked_nodes[pe->pack.node_id] == 0 && already_sampled == false) {
-                    output.verbose(CALL_INFO, 2, 0, "Sampling: Packet Loss from %d\n", pe->pack.node_id);
+                    output.verbose(CALL_INFO, 2, 0, "Currently Sampling: Packet Loss from %d\n-----------------------------------", pe->pack.node_id);
                     tracked_nodes[pe->pack.node_id] = 1;
                     nodes_limited++; 
                     if (nodes_limited == num_nodes) {
-                        output.verbose(CALL_INFO, 2, 0, "Ending Sampling Early\n");
+                        output.verbose(CALL_INFO, 2, 0, "Ending Sampling Early\n--------------------------------------------");
                         globsync_detect = 1; 
                         already_sampled = true; 
                         nodes_limited = 0;

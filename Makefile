@@ -73,11 +73,15 @@ viz_dot: $(CONTAINER) install
 	$(SINGULARITY) sst tests/$(PACKAGE).py --output-dot=$(PACKAGE).dot --dot-verbosity=6
 	$(SINGULARITY) dot -Tpng $(PACKAGE).dot > $(PACKAGE).png
 
-# Formatter for python driver files. Ran by default.
+# Converts .tex file with package name to a pdf file.
+latex: $(CONTANER)
+	$(SINGULARITY) pdflatex $(PACKAGE).tex
+
+# Formatter for python driver files. Runs in target test.
 black: $(CONTAINER)
 	$(SINGULARITY) black tests/*.py
 
-# Static type checker on python driver files. Ran by default.
+# Static type checker on python driver files. Runs in target test.
 mypy: $(CONTAINER)
 	$(SINGULARITY) mypy tests/*.py
 
