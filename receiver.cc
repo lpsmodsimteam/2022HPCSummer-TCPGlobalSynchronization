@@ -19,7 +19,7 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     output.output("%d", queue_size);
 
     // Enabling SST File Output
-    csvout.init("CSVOUT", 1, 0, SST::Output::FILE, "receiver_data.csv");
+    csvout.init("CSVOUT", 1, 0, SST::Output::FILE, "output/receiver_data.csv");
     csvout.output("Time,Queue Size,Packet Loss,Link Utilization,Global Sync Detected,Average Queue Depth\n");
 
     // Register the node as a primary component.
@@ -132,7 +132,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
         globsync_detect = 0;
     }
 
-    if (currentCycle == 300) {
+    if (currentCycle == 1000) {
         primaryComponentOKToEndSim();
         return(true);
     }

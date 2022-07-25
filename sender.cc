@@ -22,7 +22,7 @@ sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT);
 
     // Create a string for each sender's filename to output data to.
-    std::string fileName = "sender_data" + std::to_string(node_id) + ".csv";
+    std::string fileName = "output/sender_data" + std::to_string(node_id) + ".csv";
     csvout.init("CSVOUT", 1, 0, SST::Output::FILE, fileName);
     csvout.output("Time,Send Rate\n");
 
