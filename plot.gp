@@ -12,7 +12,7 @@
 reset session
 
 set datafile separator ','
-set terminal png size 1920,1080
+set terminal pngcairo size 1920,1080
 set output "plot.png"
 set grid
 set xlabel"Time (s)"
@@ -43,8 +43,11 @@ set multiplot layout 3,2 title "TCP Global Synchronization"
 
     set title "Transmission Rates of Senders over time"
     set ylabel "Packets Sent per Second"
-    set key at graph 1, 0.8
+    #set key at graph 1, 0.8
+    set xlabel "Time (ms)" 
     plot for [i=0:(ARG1-1)] "output/sender_data".i.".csv" using 1:2 title "Sender-".i with lines lw 3
+    #plot "output/sender_data0.csv" using 1:2 title "Sender-0" with lines lw 3 lt 2 dashtype 1, "output/sender_data1.csv" using 1:2 title "Sender-1" with lines lw 3 lt 3 dashtype 3, "output/sender_data2.csv" using 1:2 title "Sender-2" with lines lw 3 lt 4 dashtype 4
+    #plot for [i=0:(ARG1-1)] "output/sender_data".i.".csv" using 1:2 notitle with lines lw 3
 
     #unset label 1 # included here because label 1 was being plotted on this graph.
     #set title "Average Queue Depth"

@@ -29,6 +29,9 @@ sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     // Register Clock
     registerClock(clock, new SST::Clock::Handler<sender>(this, &sender::tick));
 
+    std::string delay_clock = "1ms";   
+    delay_tc = registerClock(delay_clock, new SST::Clock::Handler<sender>(this, &sender::dummy));
+
     // Configure Port
     port = configureLink("port", new SST::Event::Handler<sender>(this, &sender::eventHandler));
     if (!port) {
@@ -56,12 +59,19 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
         for (int i = 0; i < packets_to_send; i++) {
             output.verbose(CALL_INFO, 3, 0, "Sending Packet #%d\n", i);
             sendPacket(i, send_delay); 
-            send_delay += i; // Adding send delay equal to (1 + link travel speed).
+            send_delay += 1; // Adding send delay equal to (1 + link travel speed).
                              // This is done to allow sender's to send packets consecutively with each other.
         }
-    } 
+    } else {
+        // Output zero for send rate.
+        csvout.output("%ld,%d\n", getCurrentSimTime(), 0);
+    }
     send_delay = 0; // Reset send delay for next cycle.
     return(false);
+}
+
+bool sender::dummy( SST::Cycle_t currentCycle ) {
+
 }
 
 /**
@@ -102,5 +112,5 @@ void sender::sendPacket(int id, int delay) {
     // *tc is defined only in the header but it appears to be initialized by SST. 
     //  send() did not work as intended when overloaded with two parameters (i.e. send(delay, event))
     //  so tc was added and functionality worked as intended (adding 1ms of send delay).
-    port->send(delay, tc, new PacketEvent(packet));
+    port->send(delay, delay_tc, new PacketEvent(packet));
 }

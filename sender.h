@@ -36,6 +36,8 @@ public:
      */
     bool tick ( SST::Cycle_t currentCycle );
 
+    bool dummy ( SST::Cycle_t currentCycle );
+
     /**
      * @brief Handles packet information received from a receiver component.
      * 
@@ -80,7 +82,8 @@ private:
     SST::Output csvout;     //!< SST Output object for printing to a csv file.
 
     SST::Link *port;        //!< Pointer to component's port. 
-    SST::TimeConverter *tc; //!< Required to convert sim time and component time.
+    SST::TimeConverter *delay_tc; //!< Required to convert sim time and component time.
+    SST::TimeConverter *tc;
 
     /**
      * @brief Constructs and sends a packet out the sender's port.

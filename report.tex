@@ -42,7 +42,7 @@
         \date{\today}
             \maketitle
         \begin{abstract}
-            \href{https://en.wikipedia.org/wiki/TCP_global_synchronization}{TCP Global Synchronization} is a networking problem in which a burst of traffic in a network causes multiple clients to drop packets and limit their transmission rates. Afterwards, the clients begin to increase their transmission rates consecutively which results in more packet loss and transmission limiting, which creates a loop of this activity. This research addresses the question as to if metrics exist to determine if this problem has occurred in a simulated network. These metrics are useful for network architects who are unaware of this problem, because they can better understand how to avoid causing this problem in a network simulation. The \href{https://en.wikipedia.org/wiki/Discrete-event_simulation}{discrete-event simulator} (DES) framework called \href{http://sst-simulator.org/}{Structural Simulation Toolkit} (SST) is used to simulate this activity and find a metric. A SST model is created of a simple \href{https://en.wikipedia.org/wiki/Reliability_(computer_networking}{reliable network} where components send data to a receiving component who will drop data when its queue is filled. Global synchronization is caused in the simulation and data is collected from the model's components to determine metrics for detecting global synchronization. A resulting metric found is to look in a window of activity when packet loss occurs and measure the number of sending components that have reduced their transmission rates.
+            \href{https://en.wikipedia.org/wiki/TCP_global_synchronization}{TCP Global Synchronization} is a networking problem in which a burst of traffic in a network causes multiple clients to drop packets and limit their transmission rates. Afterwards, the clients begin to increase their transmission rates consecutively which results in more packet loss and transmission limiting, which creates a loop of this activity. This research addresses the question as to whether metrics exist to determine if this problem has occurred in a simulated network. These metrics are useful for network architects who are unaware of this problem, because they can better understand how to avoid causing this problem in a network simulation. The \href{https://en.wikipedia.org/wiki/Discrete-event_simulation}{discrete-event simulator} (DES) framework called \href{http://sst-simulator.org/}{Structural Simulation Toolkit} (SST) is used to simulate this activity and find a metric. An SST model is created of a simple \href{https://en.wikipedia.org/wiki/Reliability_(computer_networking}{reliable network} where components send data to a receiving component who will drop data when its queue is filled. Global synchronization is caused in the simulation and data is collected from the model's components to determine metrics for detecting global synchronization. A resulting metric found is to look in a window of activity when packet loss occurs and measure the number of sending components that have reduced their transmission rates.
 
         \end{abstract}
     \end{minipage}
@@ -65,22 +65,31 @@ Identifying the metrics to detect TCP Global Synchronization will be vital for d
 A second outcome of this work is to develop examples and documentation of SST simulations that new users can utilize. Currently, SST is primarily used for \href{https://en.wikipedia.org/wiki/High-performance_computing}{High-Performance Computing} (HPC) simulations and the majority of SST examples revolve around modeling HPC systems. However, the SST framework utilizes a powerful discrete-event simulator that can model more than just HPC systems. The models and documentation created for this project show off the discrete-event simulator for simulations not relating to HPC systems.
 
 \section{Prior work} % what does this build on?
-Prior research \cite{Bashi2017} does not involve discovering metrics that can detect this problems existence in simulation; however, it was useful in understanding the problem and how different packet dropping policies create or reduce global synchronization.
+Prior research by Bashi and Al-Hammouri \cite{Bashi2017} does not involve discovering metrics that can detect this problems existence in simulation; however, it was useful in understanding the problem and how different packet dropping policies create or reduce global synchronization.
 
 \section{Running the Model}
 
-The software developed to respond to this challenge can be run on one laptop.
+The software developed for this challenge was run on one laptop running an Ubuntu-Based Linux operating system.
 
-\noindent The software is available on \href{https://github.com/lpsmodsim/2022HPCSummer-CongestiveCollapse}{https://github.com/lpsmodsim/2022HPCSummer-CongestiveCollapse}.\newline
+\noindent The software is available on \href{https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization}{https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization}.\newline
 
-\noindent Assuming the user is on a system running a Ubuntu-Based Linux Distro. To run the software:
+\noindent Assuming the user is on a system running a Ubuntu-Based Linux Distro. To run the software:\newline
 
-%\noindent Prerequisites: 
-\noindent TODO: Add prerequisites (get SST singularity container, add additions.sif, etc))
+\noindent Prerequisites: 
 
 \begin{verbatim}
-	git clone https://github.com/lpsmodsim/2022HPCSummer-CongestiveCollapse
-	cd 2022HPCSummer-CongestiveCollapse
+	sudo apt install singularity
+	git clone https://github.com/tactcomplabs/sst-containers.git
+	cp sst-containers/singularity/sstpackage-11.1.0-ubuntu-20.04.sif /usr/local/bin/
+	git clone https://github.com/lpsmodsim/2022HPCSummer-SST.git
+	sudo . /2022HPCSummer-SST/additions.def.sh
+\end{verbatim}
+
+\noindent Obtaining and running the model:
+
+\begin{verbatim}
+	git clone https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization
+	cd 2022HPCSummer-TCPGlobalSynchronization
 	make
 \end{verbatim}
 
@@ -96,15 +105,16 @@ The software developed to respond to this challenge can be run on one laptop.
 \noindent The simulation can be modified by editing the python driver file, it is located at:
 
 \begin{verbatim}
-	2022HPCSummer-CongestiveCollapse/tests/congestionCollapse.py
+	2022HPCSummer-TCPGlobalSynchronization/tests/tcpGlobSync.py
 \end{verbatim}
 
 \section{SST Model}
 
-The model is a simplified version of a \href{https://en.wikipedia.org/wiki/Reliability_(computer_networking)}{reliable network protocol} with a \href{https://en.wikipedia.org/wiki/Tail_drop}{tail drop queue management policy}. It is made up of sender components and receiver components. It makes the following assumptions:
+The model is a simplified version of a \href{https://en.wikipedia.org/wiki/Reliability_(computer_networking)}{reliable network protocol} with a \href{https://en.wikipedia.org/wiki/Tail_drop}{tail drop queue management policy}. It is made up of sender components and receiver components. The following assumptions are used in the model:
 
 \begin{itemize}
-	\item Sender components use the same protocol. They limit their transmission rates to the same value.
+	\item Sender components use the same protocol.
+	\item Sender components limit their transmission rates to the same value.
 	\item Transmission rate limiting occurs immediately after a sender is notified that its packet was dropped.
 	\item Sender components increase their transmission rates linearly after each tick.
 	\item Sender components continuously send messages during the entire simulation.
@@ -120,57 +130,78 @@ The model involves a receiver component that has \textit{n} ports which connect 
 
 \section{Result} % conclusion/summary
 
-The resulting metric is to look at the time in which senders limit their transmission rates.
+The metric capable of detecting TCP global synchronization is to look at the time in which senders limit their transmission rates.
 
 Global synchronization occurs when all senders limit their transmission rate at around the same time. Measuring the number of senders that limit their transmission rate in a window of time appears to be the most accurate and precise measurement for detecting global synchronization.
 						
 In the simulation, the receiver component measures this behavior. The receiver will monitor the sender connected to it. When a sender limits its transmission rates, the receiver will begin sampling input for a window of time. If all sender limit their transmission rates in the window, the problem's behavior is detected in the simulation. This metric is demonstrated on three simulations which simulate three different scenarios of network traffic:
 											
-The first simulation is of three senders that have a combined transmission rate that is under the receiver's \href{https://www.solarwinds.com/resources/it-glossary/network-capacity}{capacity}. The receiver's queue will not fill so packet loss will not occur, and senders will not limit their transmission rates. In this scenario, global synchronization is not occurring so the metric will not detect this behavior in the simulation.
+The first simulation is of three senders that have a combined transmission rate that is under the receiver's \href{https://www.solarwinds.com/resources/it-glossary/network-capacity}{capacity}. The receiver's queue will not fill so packet loss will not occur, and senders will not limit their transmission rates; see Figure \ref{fig:good-rate}. In this scenario, global synchronization is not occurring so the metric will not detect this behavior in the simulation; see Figure \ref{fig:good-metric}.
 	
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.55]{good-rate}
 	\caption{Transmission rates of the three senders. Transmission rate limiting does not occur so global synchronization is not detected.}
+	\label{fig:good-rate}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.55]{good-metric}
 	\caption{Metric does not detect the existence of global synchronization in simulation one.}
+	\label{fig:good-metric}
 \end{figure}
 
-The second simulation contains two senders that send packets to a receiver at a rate in which the queue does not fill up so packet loss can not occur. A third client is introduced after one hundred seconds and disrupts the network by sending packets which causes the queue to fill and packets to be dropped. All clients send packages consecutively when the packet loss occurs so they all encounter packet loss and limit their transmission rates consecutively. This creates the problem of global synchronization as they attempt to increase their transmission rates back over time which leads to more packet loss and rate limiting. In this scenario, global synchronization occurs and the metric detects it.
+The second simulation contains two senders that send packets to a receiver at a rate in which the queue does not fill up so packet loss can not occur. A third client is introduced after one hundred seconds and disrupts the network by sending packets which causes the queue to fill and packets to be dropped. All clients send packages consecutively when the packet loss occurs so they all encounter packet loss and limit their transmission rates consecutively; see Figure \ref{fig:bad-rate}. This creates the problem of global synchronization as they attempt to increase their transmission rates back over time which leads to more packet loss and rate limiting. In this scenario, global synchronization occurs and the metric detects it; see Figure \ref{fig:bad-metric}.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{bad-rate}
 	\caption{Transmission rates of the three senders over time.}
+	\label{fig:bad-rate}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{bad-metric}
 	\caption{Metric detecting the existence of the problem in simulation two.}
-\end{figure}
+	\label{fig:bad-metric}
+\end{figure}	
 
-The third simulation contains the same parameters as simulation two. However, a simple algorithm inspired by \href{https://en.wikipedia.org/wiki/Random_early_detection}{Random Early Detection} (RED) is incorporated into the simulation to prevent global synchronization from occurring. This algorithm runs every time the receiver receives a packet and works by dropping random packets after the queue size becomes greater than its maximum size. This is used to demonstrate the metric in an environment where global synchronization could potentially occur but does not. This is to test if the metric can produce false positives.
+The third simulation contains the same parameters as simulation two. However, a simple algorithm inspired by \href{https://en.wikipedia.org/wiki/Random_early_detection}{Random Early Detection} (RED) is incorporated into the simulation to prevent global synchronization from occurring. This algorithm runs every time the receiver receives a packet and works by dropping random packets after the queue size becomes greater than user-defined size. This will cause senders to limit their transmission rates early and and at random intervals; see Figure \ref{fig:rand-rate}. This is used to demonstrate the metric in an environment where global synchronization could potentially occur but does not. This is to test if the metric can produce false positives; see Figure \ref{fig:rand-metric}.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{rand-rate}
 	\caption{Transmission rates of the three senders over time.}
+	\label{fig:rand-rate}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{rand-metric}
 	\caption{Metric does not detect global synchronization in simulation three.}
-\end{figure}														
-													
+	\label{fig:rand-metric}
+\end{figure}
 
+Expanding the window size for sampling will cause the metric to produce false positives. The following simulation has a sampling window size of forty-thousand milliseconds. Visually, the transmission rates of the senders do not synchronize in Figure \ref{fig:falpos-rate}. However the metric produces unintended results; see Figure \ref{fig:falpos-metric}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{falpos-rate}
+	\caption{Simulation where transmission rates are limited in a window of around thirty-thousand milliseconds.}
+	\label{fig:falpos-rate}
+\end{figure}		
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{falpos-metric}
+	\caption{A large window size (forty-thousand milliseconds) causes the metric to produce false-positives.}
+	\label{fig:falpos-metric}
+\end{figure}								
+													
 \section{Future Work}
-Currently, the metric detects a time when the behavior for global synchronization is occurring but it may not necessarily mean the problem exist in a network. Queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{Weighted Random Early Detection} (WRED) or RED attempts to avoid global synchronization by randomizing when senders limit their transmission rates based on the average queue size of the receiver. However, if their is a burst of traffic in the network and the receiver's average queue size is larger than a maximum threshold, packet loss can occur for all connected senders and they will synchronously limit transmission rates. If WRED was used in a simulation, the current metric could potentially report that global synchronization is occurring but it would be in randomly spaced intervals unlike what is shown in Figure 5.
+Currently, the metric detects a time when the behavior for global synchronization is occurring but it may not necessarily mean the problem exist in a network. Queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{Weighted Random Early Detection} (WRED) or RED attempts to avoid global synchronization by randomizing when senders limit their transmission rates based on the average queue size of the receiver. However, if their is a burst of traffic in the network and the receiver's average queue size is larger than a maximum threshold, packet loss can occur for all connected senders and they will synchronously limit transmission rates. If WRED was used in a simulation, the current metric could potentially report that global synchronization is occurring but it would be in randomly spaced intervals unlike what is shown in Figure \ref{fig:bad-metric}.
 
 A more accurate metric will be to keep track of the time in which the behavior is detected and subtract it with the last time the behavior was detected. This will give the interval of time between the detection of global synchronization in the network. If this is repeated and the interval of time between detection remains constant then global synchronization is occurring in the network.
 

@@ -38,11 +38,12 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     //WRED Stuff
     queue_avg = 0;
     prev_avg = 0;
-    enable_pred = 0;
+    enable_pred = 1;
     rand_num = 0;
-    min_pred = queue_size * 0.45; 
+    min_pred = queue_size * 0.9; 
+    count_pred = 0;
    
-	rng = new SST::RNG::MarsagliaRNG(10, 123); // Create a Marsaglia RNG with a default value and a random seed.
+	rng = new SST::RNG::MarsagliaRNG(10, 124); // Create a Marsaglia RNG with a default value and a random seed.
     
     // Stats 
     packet_loss = 0;
@@ -132,7 +133,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
         globsync_detect = 0;
     }
 
-    if (currentCycle == 1000) {
+    if (currentCycle == 300) {
         primaryComponentOKToEndSim();
         return(true);
     }
@@ -144,8 +145,9 @@ void receiver::eventHandler(SST::Event *ev) {
     PacketEvent *pe = dynamic_cast<PacketEvent*>(ev); // Cast the incoming event to a PacketEvent pointer.
     if (pe != NULL) {
         switch (pe->pack.type) {
-            case PACKET: 
+            case PACKET:
                 count_pred++; 
+                output.verbose(CALL_INFO, 3, 0, "Received msg from %d\n", pe->pack.node_id);
                 if (enable_pred) {
                     /**queue_avg = prev_avg + (msgQueue.size() - prev_avg) / pow(2, 6);
                     prev_avg = queue_avg;
@@ -172,15 +174,16 @@ void receiver::eventHandler(SST::Event *ev) {
                         count_pred = 0;
                     }*/
 
-                    if (msgQueue.size() <= queue_size / 2) {
+                    if (msgQueue.size() <= min_pred) {
                         msgQueue.push(pe->pack);
                     }
 
-                    if (msgQueue.size() > queue_size / 2) {
+                    if (msgQueue.size() > min_pred) {
                         if (count_pred > 250) {
                             //try for drop
                             rand_num = (float) (rng->nextUniform());
-                            if (rand_num < 0.50) {
+                            if (rand_num < 0.30) {
+                                output.output(CALL_INFO, "DROPPED EARLY----------------------\n");
                                 Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
                                 port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
                                 packet_loss++;
