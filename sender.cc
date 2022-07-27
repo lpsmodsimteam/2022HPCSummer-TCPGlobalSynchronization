@@ -52,7 +52,7 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
         output.verbose(CALL_INFO, 2, 0, "Sending %d\n", curr_send_rate);
 
         // Output send rate data to file. 
-        csvout.output("%ld,%d\n", getCurrentSimTime(), curr_send_rate);
+        csvout.output("%ld,%d\n", getCurrentSimTime() / 1000, curr_send_rate);
 
         // Send number of packets equal to the current send rate.
         packets_to_send = curr_send_rate; 
@@ -64,14 +64,14 @@ bool sender::tick( SST::Cycle_t currentCycle ) {
         }
     } else {
         // Output zero for send rate.
-        csvout.output("%ld,%d\n", getCurrentSimTime(), 0);
+        csvout.output("%ld,%d\n", getCurrentSimTime() / 1000, 0);
     }
     send_delay = 0; // Reset send delay for next cycle.
     return(false);
 }
 
 bool sender::dummy( SST::Cycle_t currentCycle ) {
-
+    return(false);
 }
 
 /**

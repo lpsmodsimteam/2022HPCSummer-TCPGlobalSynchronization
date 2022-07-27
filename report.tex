@@ -7,6 +7,15 @@
 \usepackage{xfrac}
 \usepackage{float}
 
+\usepackage{listings}
+\lstset{
+	basicstyle=\ttfamily,
+	columns=fullflexible,
+	frame=single,
+	breaklines=true,
+	postbreak=\mbox{\textcolor{black}{$\hookrightarrow$}\space},
+}
+
 % margins of 1 inch:
 \setlength{\topmargin}{-.5in}
 \setlength{\textheight}{9.5in}
@@ -102,7 +111,7 @@ The software developed for this challenge was run on one laptop running an Ubunt
 
 \noindent TODO: Include example output\newline
 
-\noindent The simulation can be modified by editing the python driver file, it is located at:
+\noindent The simulation can be modified by editing the \href{http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/}{python driver file}, it is located at:
 
 \begin{verbatim}
 	2022HPCSummer-TCPGlobalSynchronization/tests/tcpGlobSync.py
@@ -140,14 +149,14 @@ The first simulation is of three senders that have a combined transmission rate 
 	
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.55]{good-rate}
+	\includegraphics[scale=0.50]{good-rate}
 	\caption{Transmission rates of the three senders. Transmission rate limiting does not occur so global synchronization is not detected.}
 	\label{fig:good-rate}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.55]{good-metric}
+	\includegraphics[scale=0.5]{good-metric}
 	\caption{Metric does not detect the existence of global synchronization in simulation one.}
 	\label{fig:good-metric}
 \end{figure}
@@ -189,21 +198,105 @@ Expanding the window size for sampling will cause the metric to produce false po
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{falpos-rate}
-	\caption{Simulation where transmission rates are limited in a window of around thirty-thousand milliseconds.}
+	\caption{Simulation where all transmission rates are limited within a window of around 30 seconds}
 	\label{fig:falpos-rate}
 \end{figure}		
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{falpos-metric}
-	\caption{A large window size (forty-thousand milliseconds) causes the metric to produce false-positives.}
+	\caption{A large window size (forty seconds) causes the metric to produce false-positives.}
 	\label{fig:falpos-metric}
-\end{figure}								
+\end{figure}
+
+The metric results from an algorithm ran during the simulation, so it can be analyzed or used during runtime. The data it produces is also output to a log file for analysis after the simulation has ended.
+
+The algorithm is run on the receiver in the SST model but could be generalized to any node capable of collecting information on all senders that are connected to a receiver. The following \href{https://en.wikipedia.org/wiki/C%2B%2B}{C++} code snippets show the implementation of the algorithm that results in the metric:\newline
+
+\noindent In the node's setup function:
+\begin{lstlisting}[language=C++, commentstyle=\fontfamily{fve}\selectfont\color{black}]
+void receiver::setup() {
+	...
+	// Dynamically allocate an array to keep track of what sender components have limited transmission rates during a window of time.
+	tracked_senders = (int*) calloc(num_senders, sizeof(int));
+	...
+}
+\end{lstlisting}
+
+\noindent In the node's tick/update function:
+
+\begin{lstlisting}[language=C++, commentstyle=\fontfamily{fve}\selectfont\color{black}]
+bool receiver::tick(SST::Cycle_t currentCycle) {
+	...
+	// Check if the window time for sampling has ended.
+	if (sampling_status == true && (getCurrentSimTimeMilli() >= sampling_start_time + window_size)) {
+		already_sampled = false;
+		sampling_status = false;
+		
+		// Reset variable/array data. 
+		sampling_start_time = 0;
+		senders_limited = 0;
+		for (int i = 0; i < num_nodes; i++) {
+			tracked_senders[i] = 0;
+		}
+	}
+	...
+}
+\end{lstlisting}
+					
+\noindent In the node's event handler that captures when senders have limited their transmission rate:
+
+\begin{lstlisting}[language=C++, commentstyle=\fontfamily{fve}\selectfont\color{black}]
+void receiver::eventHandler(SST::Event *ev) {
+	...
+	// Receives an event that a sender has limited their transmission rates.
+	case LIMIT: 
+	
+	/** 
+		Background: 
+		"pe" is event sent by a sender component that limited their transmission rate.
+		"pe->pack.node_id" is the specific sender that sent the event.
+	*/
+	
+	// When the node is not sampling and receives an event that a sender is limiting transmission rates,
+	// it begins sampling for other transmission rate limiting in the set window time.
+	if (sampling_status == false && already_sampled == false) {
+		sampling_start_time = getCurrentSimTimeMilli(); // Set start time of sampling.
+		sampling_status = true;		// Begin sampling.
+		tracked_senders[pe->pack.node_id] = 1;	// Set the sender that caused sampling to begin to
+		senders_limited++;	// Increase the number of senders that have limited their transmission rates.
+	} 
+	
+	// During sampling, check if the sender that limited their transmission rate is new, and that sampling has not already ended early (behavior has already been detected in sampling window).
+	if (sampling_status == true && tracked_senders[pe->pack.node_id] == 0 && already_sampled == false) {
+		tracked_senders[pe->pack.node_id] = 1;
+		senders_limited++; 
+		
+		// Check if all seperate senders have limited their transmission rates in the sampling window time.
+		if (senders_limited == num_nodes) {
+			globsync_detect = 1;	// Set boolean metric to true.
+			already_sampled = true;		// End sampling early.
+			
+			// Reset variable/array data.
+			senders_limited = 0;
+			for (int i = 0; i < num_nodes; i++) {
+				tracked_senders[i] = 0;
+			}
+		}
+	} 
+	break;
+	...
+}
+\end{lstlisting}
 													
 \section{Future Work}
 Currently, the metric detects a time when the behavior for global synchronization is occurring but it may not necessarily mean the problem exist in a network. Queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{Weighted Random Early Detection} (WRED) or RED attempts to avoid global synchronization by randomizing when senders limit their transmission rates based on the average queue size of the receiver. However, if their is a burst of traffic in the network and the receiver's average queue size is larger than a maximum threshold, packet loss can occur for all connected senders and they will synchronously limit transmission rates. If WRED was used in a simulation, the current metric could potentially report that global synchronization is occurring but it would be in randomly spaced intervals unlike what is shown in Figure \ref{fig:bad-metric}.
 
 A more accurate metric will be to keep track of the time in which the behavior is detected and subtract it with the last time the behavior was detected. This will give the interval of time between the detection of global synchronization in the network. If this is repeated and the interval of time between detection remains constant then global synchronization is occurring in the network.
+
+% if the above is implemented, then the problem becomes what if network traffic is too much for the receiver to handle?
+% wred and red will both have average queue size above threshold consistently which would cause global sync behavior
+% this would generate false positives on then new measure as well.
 
 \bibliographystyle{plain}
 \bibliography{biblio}
