@@ -20,7 +20,7 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
 
     // Enabling SST File Output
     csvout.init("CSVOUT", 1, 0, SST::Output::FILE, "output/receiver_data.csv");
-    csvout.output("Time,Queue Size,Packet Loss,Link Utilization,Global Sync Detected,Average Queue Depth\n");
+    csvout.output("Time,Queue Size,Packet Loss,Link Utilization,Global Sync Detected,Average Queue Depth,Times Problem Detected,Average Time Difference between Problem,Variance of Time Difference\n");
 
     // Register the node as a primary component.
 	// Then declare that the simulation cannot end until this
@@ -49,6 +49,14 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     packet_loss = 0;
     packets_processed = 0;
     link_utilization = 0;
+
+    num_globsync = 0;
+    prev_globsync_time = 0;
+    new_globsync_time = 0;
+    globsync_time_diff_avg = 0;
+    total_time_diff = 0;
+    metric_middle = 0;
+    metric_variance = 0;
 
     // Pointer to an array of port pointers.
     port = new SST::Link*[num_nodes];
@@ -89,12 +97,14 @@ void receiver::finish() {
 bool receiver::tick( SST::Cycle_t currentCycle ) {
     output.verbose(CALL_INFO, 2, 0, "SimTime: %ld\n", getCurrentSimTime());
     output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size());
-    output.verbose(CALL_INFO, 2, 0, "Global Synchronization Percentage: %f\n\n", globsync_detect);
+    output.verbose(CALL_INFO, 2, 0, "Global Synchronization Detected: %f\n\n", globsync_detect);
    
     // Data output and File output
-    output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\n\n", 
-        getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect);
-    csvout.output("%ld,%ld,%d,%f,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg);
+    output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\nCurrent Sim Time: %ld\n", 
+        getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect, getCurrentSimTimeMilli());
+    output.verbose(CALL_INFO, 1, 0, "Number of times behavior has occured: %d\nDifference in time between last two detection: %f\nAverage difference in time between detections: %f\n",
+        num_globsync, new_globsync_time - prev_globsync_time, globsync_time_diff_avg);
+    csvout.output("%ld,%ld,%d,%f,%f,%f,%d,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg, num_globsync, globsync_time_diff_avg, metric_variance);
     output.output(CALL_INFO, "Queue Average: %f, Prev Queue Average: %f\n", queue_avg, prev_avg);
 
     if (sampling_status == true && (getCurrentSimTimeMilli() >= sampling_start_time + window_size)) {
@@ -133,7 +143,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
         globsync_detect = 0;
     }
 
-    if (currentCycle == 300) {
+    if (currentCycle == 1000) {
         primaryComponentOKToEndSim();
         return(true);
     }
@@ -235,6 +245,34 @@ void receiver::eventHandler(SST::Event *ev) {
                     nodes_limited++; 
                     if (nodes_limited == num_nodes) {
                         output.verbose(CALL_INFO, 2, 0, "Ending Sampling Early\n--------------------------------------------");
+
+                        /**
+                        // If this is the first detection
+                        if (prev_globsync_time == 0) {
+                            prev_globsync_time = 0; 
+                        } else {
+                            // Order of operations is vital here.
+                            new_globsync_time = getCurrentSimTimeMilli();
+                            output.output("New: %f, Prev: %f", new_globsync_time, prev_globsync_time);
+                            num_globsync++;
+                            globsync_time_diff_avg = (globsync_time_diff_avg + (new_globsync_time - prev_globsync_time)) / num_globsync; 
+                            prev_globsync_time = new_globsync_time;
+                        } */
+
+                        new_globsync_time = getCurrentSimTimeMilli();
+                        output.output("New: %f, Prev: %f---------------------\n", new_globsync_time, prev_globsync_time);
+                        num_globsync++;
+                        output.output("Number of glob syncs: %d\n", num_globsync);
+                        output.output("Globsync time diff avg: %f\n", globsync_time_diff_avg);
+                        if (num_globsync != 1) { 
+                            globsync_time_diff_avg = (total_time_diff + (new_globsync_time - prev_globsync_time)) / (num_globsync - 1); 
+                            total_time_diff = total_time_diff + (new_globsync_time - prev_globsync_time);
+                            metric_middle = (new_globsync_time - prev_globsync_time) - globsync_time_diff_avg;
+                            output.output("Metric middle: %f\n", metric_middle);
+                            metric_variance = (metric_middle * metric_middle) / num_globsync - 1;
+                        } 
+                        prev_globsync_time = new_globsync_time;
+
                         globsync_detect = 1; 
                         already_sampled = true; 
                         nodes_limited = 0;

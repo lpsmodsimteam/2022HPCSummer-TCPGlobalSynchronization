@@ -113,6 +113,14 @@ private:
     int *tracked_nodes;
     int nodes_limited;          //!< Number of nodes that have limited their transmission rate in a window.
     float globsync_detect;      //!< Metric if the global synchronization behavior has occured.
+
+    int num_globsync;
+    float prev_globsync_time;
+    float new_globsync_time;
+    float globsync_time_diff_avg;
+    int total_time_diff;
+    float metric_variance;
+    float metric_middle;
     
     bool enable_pred;   //!< Enable psuedo-red algorithm to prevent global synchronization from occurring.
     float queue_avg;    //!< Average queue depth. 
