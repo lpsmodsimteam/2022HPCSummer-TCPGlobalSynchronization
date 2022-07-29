@@ -87,7 +87,7 @@ The software developed for this challenge was run on one laptop running an Ubunt
 \noindent Prerequisites: 
 
 \begin{verbatim}
-	sudo apt install singularity
+	sudo apt install singularity black mypi
 	git clone https://github.com/tactcomplabs/sst-containers.git
 	cp sst-containers/singularity/sstpackage-11.1.0-ubuntu-20.04.sif /usr/local/bin/
 	git clone https://github.com/lpsmodsim/2022HPCSummer-SST.git
@@ -109,7 +109,21 @@ The software developed for this challenge was run on one laptop running an Ubunt
 	make
 \end{verbatim}
 
-\noindent TODO: Include example output\newline
+\noindent Expected Output:
+
+\begin{lstlisting}[language=bash, frame=none]
+mkdir -p .build
+singularity exec /usr/local/bin/additions.sif g++ -std=c++1y -D\_\_STDC\_FORMAT\_MACROS -fPIC -DHAVE\_CONFIG\_H -I/opt/SST/11.1.0/include -MMD -c receiver.cc -o .build/receiver.o
+mkdir -p .build
+singularity exec /usr/local/bin/additions.sif g++ -std=c++1y -D\_\_STDC\_FORMAT\_MACROS -fPIC -DHAVE\_CONFIG\_H -I/opt/SST/11.1.0/include -MMD -c sender.cc -o .build/sender.o
+singularity exec /usr/local/bin/additions.sif g++ -std=c++1y -D\_\_STDC\_FORMAT\_MACROS -fPIC -DHAVE\_CONFIG\_H -I/opt/SST/11.1.0/include -shared -fno-common -Wl,-undefined -Wl,dynamic\_lookup -o libtcpGlobSync.so .build/receiver.o .build/sender.o
+singularity exec /usr/local/bin/additions.sif sst-register tcpGlobSync tcpGlobSync\_LIBDIR=/home/{USER}/sst-work/2022HPCSummer-TCPGlobalSynchronization
+singularity exec /usr/local/bin/additions.sif black tests/*.py
+singularity exec /usr/local/bin/additions.sif mypy tests/*.py
+Success: no issues found in 2 source files
+singularity exec /usr/local/bin/additions.sif sst tests/tcpGlobSync.py
+(Simulator console output)
+\end{lstlisting}
 
 \noindent The simulation can be modified by editing the \href{http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/}{python driver file}, it is located at:
 
