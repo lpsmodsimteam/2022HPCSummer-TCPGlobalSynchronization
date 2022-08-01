@@ -15,7 +15,7 @@ set datafile separator ','
 set terminal pngcairo size 1920,1080
 set output "plot.png"
 set grid
-set xlabel"Time (s)"
+set xlabel "Time (Ticks)" font ",16"
 set offset graph 0,0.1,0.1,0
 
 stats "output/receiver_data.csv" using 1:4 nooutput # collect statistic info
@@ -47,6 +47,9 @@ set multiplot layout 3,2 title "TCP Global Synchronization"
     plot for [i=0:(ARG1-1)] "output/sender_data".i.".csv" using 1:2 title "Sender-".i with lines lw 3
     #plot "output/sender_data0.csv" using 1:2 title "Sender-0" with lines lw 3 lt 2 dashtype 1, "output/sender_data1.csv" using 1:2 title "Sender-1" with lines lw 3 lt 3 dashtype 3, "output/sender_data2.csv" using 1:2 title "Sender-2" with lines lw 3 lt 4 dashtype 4
     #plot for [i=0:(ARG1-1)] "output/sender_data".i.".csv" using 1:2 notitle with lines lw 3
+
+    #plot "output/sender_data0.csv" using 1:2 title "Sender-0" with lines lw 4 lt rgb "#ff0067" dashtype 1, "output/sender_data1.csv" using 1:2 title "Sender-1" with lines lt rgb "#0000ff" lw 4 dashtype 1, "output/sender_data2.csv" using 1:2 title "Sender-2" with lines dashtype 1 lt rgb "#ffa600" lw 4 
+
 
     #unset label 1 # included here because label 1 was being plotted on this graph.
     #set title "Average Queue Depth"

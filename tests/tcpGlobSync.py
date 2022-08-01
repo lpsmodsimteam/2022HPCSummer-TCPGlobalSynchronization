@@ -2,8 +2,15 @@
 
 import sst  # Use SST Library
 
+# REQUIREMENTS:
+# If n Sender components are created, the field 'node_id' should be equal to some number 0 to n-1 and should be different for each component.
+# Receiver component's field 'num_ports' must be equal to the number of Sender components created.
+# i.e. if I create two sender components, one must have node_id '0' and the other node_id '1'. The receiving component will have num_ports '2'.
+
 # Creating a sender component from element tcpGlobSync (tcpGlobSync.sender) named "Sender Zero."
 sender_zero = sst.Component("Sender Zero", "tcpGlobSync.sender")
+
+# Add parameters to sender.
 sender_zero.addParams(
     {
         "tickFreq": "1s",  # frequency component updates at.
@@ -39,6 +46,7 @@ sender_two.addParams(
     }
 )
 
+# Create a receiver and add parameters to it.
 receiver = sst.Component("Receiver Node", "tcpGlobSync.receiver")
 receiver.addParams(
     {

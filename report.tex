@@ -155,6 +155,9 @@ The model involves a receiver component that has \textit{n} ports which connect 
 
 The metric capable of detecting TCP global synchronization is to look at the time in which senders limit their transmission rates.
 
+\color{red} Average time difference between synchronization rate limits is now a metric, include graphs and edit section.
+
+\color{black}
 Global synchronization occurs when all senders limit their transmission rate at around the same time. Measuring the number of senders that limit their transmission rate in a window of time appears to be the most accurate and precise measurement for detecting global synchronization.
 						
 In the simulation, the receiver component measures this behavior. The receiver will monitor the sender connected to it. When a sender limits its transmission rates, the receiver will begin sampling input for a window of time. If all sender limit their transmission rates in the window, the problem's behavior is detected in the simulation. This metric is demonstrated on three simulations which simulate three different scenarios of network traffic:
@@ -164,7 +167,7 @@ The first simulation is of three senders that have a combined transmission rate 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.50]{good-rate}
-	\caption{Transmission rates of the three senders. Transmission rate limiting does not occur so global synchronization is not detected.}
+	\caption{ \color{red} CHANGE LINE TYPES Transmission rates of the three senders. Transmission rate limiting does not occur so global synchronization is not detected.}
 	\label{fig:good-rate}
 \end{figure}
 
@@ -180,7 +183,7 @@ The second simulation contains two senders that send packets to a receiver at a 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{bad-rate}
-	\caption{Transmission rates of the three senders over time.}
+	\caption{ \color{red} CHANGE LINE TYPES.Transmission rates of the three senders over time.}
 	\label{fig:bad-rate}
 \end{figure}
 
@@ -196,7 +199,7 @@ The third simulation contains the same parameters as simulation two. However, a 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{rand-rate}
-	\caption{Transmission rates of the three senders over time.}
+	\caption{\color{red} CHANGE LINE TYPES Transmission rates of the three senders over time.}
 	\label{fig:rand-rate}
 \end{figure}
 
@@ -212,7 +215,7 @@ Expanding the window size for sampling will cause the metric to produce false po
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{falpos-rate}
-	\caption{Simulation where all transmission rates are limited within a window of around 30 seconds}
+	\caption{\color{red} CHANGE LINE TYPES Simulation where all transmission rates are limited within a window of around 30 seconds}
 	\label{fig:falpos-rate}
 \end{figure}		
 
@@ -304,8 +307,11 @@ void receiver::eventHandler(SST::Event *ev) {
 \end{lstlisting}
 													
 \section{Future Work}
+
 Currently, the metric detects a time when the behavior for global synchronization is occurring but it may not necessarily mean the problem exist in a network. Queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{Weighted Random Early Detection} (WRED) or RED attempts to avoid global synchronization by randomizing when senders limit their transmission rates based on the average queue size of the receiver. However, if their is a burst of traffic in the network and the receiver's average queue size is larger than a maximum threshold, packet loss can occur for all connected senders and they will synchronously limit transmission rates. If WRED was used in a simulation, the current metric could potentially report that global synchronization is occurring but it would be in randomly spaced intervals unlike what is shown in Figure \ref{fig:bad-metric}.
 
+\color{red} THE IDEA BELOW IS NOW IMPLEMENTED, INCLUDE NEW GRAPHS AND CHANGE FUTURE WORK
+\color{black}
 A more accurate metric will be to keep track of the time in which the behavior is detected and subtract it with the last time the behavior was detected. This will give the interval of time between the detection of global synchronization in the network. If this is repeated and the interval of time between detection remains constant then global synchronization is occurring in the network.
 
 % if the above is implemented, then the problem becomes what if network traffic is too much for the receiver to handle?
