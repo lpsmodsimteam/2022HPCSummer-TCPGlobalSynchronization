@@ -201,10 +201,15 @@ You should see the following output (click to expand):
 
 plot-rate.png
 
+<img src ="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-rate-sync.png" width="720">
+
 plot-point.png
+
+<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-point-sync.png" width="720"/>
 
 plot-avg.png
 
+<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-avg-sync.png" width="720"/>
 
 ## Testing no synchronization
 You should see the following output (click to expand):
