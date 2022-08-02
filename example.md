@@ -2,10 +2,11 @@
 
 ## Prerequisites
 git clone https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization.git
+
 cd 2022HPCSummer-TCPGlobalSynchronization/tests
 
 # Demonstrate global synchronization
-Copy the following parameters into tcpGlobSync.py to demonstrate a simulation where sychronization occurs:
+Use the following python driver file:
 ```
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
 
@@ -78,7 +79,7 @@ sst.Link("Link_Two").connect((sender_two, "port", "1ms"), (receiver, "port2", "1
 ```
 
 # Demonstrate global synchronization not occuring.
-Copy the following parameters into tcpGlobSync.py to demonstrate a simulation where sychronization does not occur:
+Use the following python driver file:
 ```
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
 
@@ -149,11 +150,30 @@ sst.Link("Link_Zero").connect((sender_zero, "port", "1ms"), (receiver, "port0", 
 sst.Link("Link_One").connect((sender_one, "port", "1ms"), (receiver, "port1", "1ms"))
 sst.Link("Link_Two").connect((sender_two, "port", "1ms"), (receiver, "port2", "1ms"))
 ```
-Notice the window_size parameter for the receiver has increased drastically. This is to force false positives in the global sychronization detection.
+The window_size parameter for the receiver has increased drastically. This is to force false positives in the global sychronization detection.
+The run_time parameter for the receiver has increased drastically. This is to collect more data to better display how detection handles false positives.
+The enable_pred parameter is set to 1 for the receiver. This removes the 'tail drop' dropping policy that causes global sychronization to occur.
 
 # Running
+This is assuming the user is on a system running a Ubuntu-Based Linux Distro.
 
+Prerequisites
 ```
+sudo apt install singularity black mypi
+git clone https://github.com/tactcomplabs/sst-containers.git
+cp sst-containers/singularity/sstpackage-11.1.0-ubuntu-20.04.sif /usr/local/bin/
+git clone https://github.com/lpsmodsim/2022HPCSummer-SST.git
+sudo . /2022HPCSummer-SST/additions.def.sh
+```
+
+Running the model
+```
+make
+```
+
+Re-run the model
+```
+make clean
 make
 ```
 
