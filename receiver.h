@@ -101,7 +101,6 @@ private:
     int process_rate;   //!< Amount of packets that can be processed per tick.
     int verbose_level;  //!< Verbosity level of console output.
     int num_nodes;      //!< Number of connected senders.
-    int num_resets;     //
     int64_t run_time;       //!< Number of cycles the simulation will run.
 
     float link_utilization;     //!< Aggregate link utilization of the receiver.
@@ -116,23 +115,19 @@ private:
     int nodes_limited;          //!< Number of nodes that have limited their transmission rate in a window.
     float globsync_detect;      //!< Metric if the global synchronization behavior has occured.
 
-    int num_globsync;
-    float prev_globsync_time;
-    float new_globsync_time;
-    float globsync_time_diff_avg;
-    int total_time_diff;
-    float metric_variance;
+    int num_globsync;               //!< Number of times synchronized rate limiting has occured.
+    float prev_globsync_time;       //!< The previous time synchronized rate limited has occured.
+    float new_globsync_time;        //!< The latest time synchronized rate limited has occured.
+    float globsync_time_diff_avg;   //!< The different in time between the latest and previous time sychronized rate limiting has occured.
+    int total_time_diff;            //!< Sum of every 
     float metric_middle;
     
     bool enable_pred;   //!< Enable psuedo-red algorithm to prevent global synchronization from occurring.
-    float queue_avg;    //!< Average queue depth. 
-    float prev_avg;     //!< Previous average queue depth.
     float min_pred;     //!< Minimum threshold for pseudo-red algorithm.
-    float max_pred;
-    int count_pred;
+    int count_pred;     //!< Counter that counts incoming packets and determines when packet drop can occur again.
     int64_t rand_seed;
-    SST::RNG::MarsagliaRNG *rng;
-    float rand_num;
+    SST::RNG::MarsagliaRNG *rng;    //!< RNG for custom dropping algorithm.
+    float rand_num;                 //!< Probability generated for dropping a packet after queue depth has reached a threshold. (min_pred)
 };
 
 #endif
