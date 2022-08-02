@@ -1,12 +1,13 @@
-### TCP Global Synchronization Example
+# TCP Global Synchronization Example
 
 ## Prerequisites
+```
 git clone https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization.git
-
-cd 2022HPCSummer-TCPGlobalSynchronization/tests
+```
 
 # Demonstrate global synchronization
-Use the following python driver file:
+Use the following python driver file
+Copy to 2022HPCSummer-TCPGlobalSynchronization/tests/tcpGlobSync.py
 ```
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
 
@@ -79,7 +80,8 @@ sst.Link("Link_Two").connect((sender_two, "port", "1ms"), (receiver, "port2", "1
 ```
 
 # Demonstrate global synchronization not occuring.
-Use the following python driver file:
+Use the following python driver file
+Copy to 2022HPCSummer-TCPGlobalSynchronization/tests/tcpGlobSync.py
 ```
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
 
@@ -168,6 +170,7 @@ sudo . /2022HPCSummer-SST/additions.def.sh
 
 Running the model
 ```
+cd 2022HPCSummer-TCPGlobalSynchronization/
 make
 ```
 
@@ -184,5 +187,22 @@ Simulation output is generated in 2022HPCSummer-TCPGlobalSynchronization/output
 Install gnuplot
 
 ```
-gnuplot -c plot.gp 3
+gnuplot -c example-plot.gp 3
 ```
+
+### Testing synchronization
+You should see the following output:
+plot-rate.png
+
+plot-point.png
+
+plot-avg.png
+
+
+### Testing no synchronization
+You should see the following output:
+plot-rate.png
+
+plot-point.png
+
+plot-avg.png
