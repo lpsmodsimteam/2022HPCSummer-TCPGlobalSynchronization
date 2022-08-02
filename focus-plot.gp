@@ -36,6 +36,8 @@ set ylabel "Average Time Difference (ms)"
 plot path_sync."receiver_data.csv" using 7:8 title "Average Time Difference between Detection Points" with lines lw 5
 
 # PLOTS FOR DATA WHERE SYCHRONIZATION DOES NOT OCCUR.
+set xlabel "Time (Simulator Ticks)"
+
 set output "plot-rate-false.png"
 set title "Transmission Rates of Senders over Simulation Time"
 set ylabel "Packets Sent Per Tick"
