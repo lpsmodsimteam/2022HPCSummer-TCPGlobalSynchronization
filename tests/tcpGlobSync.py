@@ -57,6 +57,7 @@ receiver.addParams(
         "num_nodes": "3",  # number of nodes that will connect to receiver.
         "window_size": "40000",  # window size (in sim time) for global sync detection.
         # Appears to be that 1000 cycles in sim time is 10 seconds if component tick frequency is 1s
+        "enable_pred": "0", # enable psuedo-red dropping policy to prevent sychronization from occuring.
     }
 )
 

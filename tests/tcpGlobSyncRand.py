@@ -3,8 +3,8 @@
 import sst  # Use SST Library
 import random
 
-NUM_SENDERS = 100 # Number of sender nodes to instantiate.
-SEED = 1234 # Seed for RNG
+NUM_SENDERS = 100  # Number of sender nodes to instantiate.
+SEED = 1234  # Seed for RNG
 
 # Lower and upper range for the sender component's starting cycle.
 START_CYCLE_MIN = 1
@@ -21,12 +21,12 @@ for x in range(NUM_SENDERS):
     # Adding parameters to sender node.
     senders[f"sender_{x}"].addParams(
         {
-            "tickFreq": "1s",   # frequency component updates at.
-            "low_send_rate": "1", # Minimum number of packets sent per second.
-            "max_send_rate": "50", # Maximum number of packets set per second.
-            "verbose_level": "1", # Verbosity level of console output.
+            "tickFreq": "1s",  # frequency component updates at.
+            "low_send_rate": "1",  # Minimum number of packets sent per second.
+            "max_send_rate": "50",  # Maximum number of packets set per second.
+            "verbose_level": "1",  # Verbosity level of console output.
             "node_id": f"{x}",  # ID of sender node.
-            "starting_cycle": f"{random.randint(START_CYCLE_MIN, START_CYCLE_MAX)}", # Randomized cycle in which the component begins to send packets. 
+            "starting_cycle": f"{random.randint(START_CYCLE_MIN, START_CYCLE_MAX)}",  # Randomized cycle in which the component begins to send packets.
         }
     )
 

@@ -15,8 +15,8 @@ set xlabel font ",20"
 set title font ",20"
 set lmargin 13
 
-path_sync = "demo_data/sync-data/"
-path_false_pos = "demo_data/false-pos-data/" 
+path_sync = "output/" # Change to where this data is stored. (output/ by default)
+path_false_pos = "output/" # Change to where this data is stored. (output/ by default)
 
 # PLOTS FOR DATA WHERE SYCHRONIZATION OCCURS.
 set output "plot-rate-sync.png"

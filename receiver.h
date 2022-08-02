@@ -78,6 +78,7 @@ public:
         {"verbose_level", "Verbosity level for console output", "1"},
         {"num_nodes", "Number of nodes connected to receiver", "1"},
         {"window_size", "Amount of ticks in which the number of sender nodes that transmission rates are reset occur.", "1"}, 
+        {"enable_pred", "Enable psuedo-red dropping policy to prevent global synchronization.", "0"},
     )
 
     // Port Name, Description, Event Type

@@ -12,6 +12,7 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     verbose_level = params.find<int64_t>("verbose_level", 1);
     num_nodes = params.find<int64_t>("num_nodes", 1);
     window_size = params.find<int64_t>("window_size", 100);
+    enable_pred = params.find<int64_t>("enable_pred", 0);
 
     // Enabling SST Console Output
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT);
@@ -38,7 +39,6 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     //WRED Stuff
     queue_avg = 0;
     prev_avg = 0;
-    enable_pred = 1;
     rand_num = 0;
     min_pred = queue_size * 0.9; 
     count_pred = 0;
