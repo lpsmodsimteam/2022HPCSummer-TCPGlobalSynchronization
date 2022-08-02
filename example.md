@@ -101,8 +101,9 @@ sender_zero = sst.Component("Sender Zero", "tcpGlobSync.sender")
 sender_zero.addParams(
     {
         "tickFreq": "1s",  # frequency component updates at.
+        "delayFreq": "1ms", # frequency of delay inbetween packets sent out.
         "low_send_rate": "10",  # minimum send rate of sender and what it will limit its send rate to.
-        "max_send_rate": "50",  # maximum send rate of sender
+        "max_send_rate": "50",  # maximum send rate of sender.
         "verbose_level": "1",  # level of console verbosity.
         "node_id": "0",  # id of node.
         "starting_cycle": "1",  # cycle in which component begins to send packets.
@@ -113,6 +114,7 @@ sender_one = sst.Component("Sender One", "tcpGlobSync.sender")
 sender_one.addParams(
     {
         "tickFreq": "1s",
+        "delayFreq": "1ms",
         "low_send_rate": "10",
         "max_send_rate": "50",
         "verbose_level": "1",
@@ -125,6 +127,7 @@ sender_two = sst.Component("Sender Two", "tcpGlobSync.sender")
 sender_two.addParams(
     {
         "tickFreq": "1s",
+        "delayFreq": "1ms",
         "low_send_rate": "10",
         "max_send_rate": "50",
         "verbose_level": "1",

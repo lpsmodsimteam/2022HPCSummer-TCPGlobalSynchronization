@@ -37,7 +37,6 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     
     // Variables for custom dropping policy.
     queue_avg = 0;
-    prev_avg = 0;
     rand_num = 0;
     min_pred = queue_size * 0.9; 
     count_pred = 0;

@@ -62,7 +62,7 @@ public:
     // Parameter Name, Description, Default Value
     SST_ELI_DOCUMENT_PARAMS(
         {"tickFreq", "Frequency component updates at", "1s"},
-        {"low_send_rate", "Lower limit of transmission rate", "10"},
+        {"min_send_rate", "Lower limit of transmission rate", "10"},
         {"max_send_rate", "Max limit of transmission rate", "100"},
         {"verbose_level", "Verbosity level of console output", "1"},
         {"node_id", "ID of sender node connected to receiving node", "1"},
@@ -93,7 +93,8 @@ private:
     inline void sendPacket(int id, int delay);  
 
     std::string clock;      //!< Frequency component will tick at. Takes in Unit Algebra string (i.e. "1ms").
-    int low_send_rate;      //!< Starting rate and what sender will lower transmission rate to during packet loss. 
+    std::string delay_clock;//!< Frequency that packet sending delay will tick at.
+    int min_send_rate;      //!< Starting rate and what sender will lower transmission rate to during packet loss. 
     int max_send_rate;      //!< Maximum transmission rate of a node. 
     int curr_send_rate;     //!< Number of packets that are being sent in the current cycle. 
     int packets_to_send;    //!< Number of packets that are being sent in the current cycle.

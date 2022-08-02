@@ -6,6 +6,7 @@ sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
 
     // Parameters
     clock = params.find<std::string>("tickFreq", "1s");
+    delay_clock = params.find<std::string>("delayFreq", "1ms");
     min_send_rate = params.find<int64_t>("min_send_rate", 10);
     max_send_rate = params.find<int64_t>("max_send_rate", 100);
     verbose_level = params.find<int64_t>("verbose_level", 1);
@@ -27,7 +28,7 @@ sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
     // Register Clock
     registerClock(clock, new SST::Clock::Handler<sender>(this, &sender::tick));
 
-    std::string delay_clock = "1ms";   
+    // Register Clock and store timeconverter.
     delay_tc = registerClock(delay_clock, new SST::Clock::Handler<sender>(this, &sender::dummy));
 
     // Configure Port
@@ -41,7 +42,7 @@ sender::~sender() {
 
 }
 
-bool sender::tick( SST::Cycle_t currentCycle ) { 
+bool sender::tick( SST::Cycle_t currentCycle ) {
     if (currentCycle >= starting_cycle) {
         if (curr_send_rate < max_send_rate) {
             curr_send_rate = curr_send_rate + 1; // Increase transmission rate per tick.
