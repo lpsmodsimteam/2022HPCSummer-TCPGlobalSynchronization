@@ -6,7 +6,8 @@ git clone https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization.gi
 ```
 
 # Demonstrate global synchronization
-Use the following python driver file
+Use the following python driver file.
+
 Copy to 2022HPCSummer-TCPGlobalSynchronization/tests/tcpGlobSync.py
 ```
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
@@ -80,7 +81,8 @@ sst.Link("Link_Two").connect((sender_two, "port", "1ms"), (receiver, "port2", "1
 ```
 
 # Demonstrate global synchronization not occuring.
-Use the following python driver file
+Use the following python driver file.
+
 Copy to 2022HPCSummer-TCPGlobalSynchronization/tests/tcpGlobSync.py
 ```
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
@@ -171,6 +173,7 @@ sudo . /2022HPCSummer-SST/additions.def.sh
 ```
 
 Running the model
+
 ```
 cd 2022HPCSummer-TCPGlobalSynchronization/
 make
