@@ -153,7 +153,9 @@ sst.Link("Link_One").connect((sender_one, "port", "1ms"), (receiver, "port1", "1
 sst.Link("Link_Two").connect((sender_two, "port", "1ms"), (receiver, "port2", "1ms"))
 ```
 The window_size parameter for the receiver has increased drastically. This is to force false positives in the global sychronization detection.
+
 The run_time parameter for the receiver has increased drastically. This is to collect more data to better display how detection handles false positives.
+
 The enable_pred parameter is set to 1 for the receiver. This removes the 'tail drop' dropping policy that causes global sychronization to occur.
 
 # Running
@@ -185,13 +187,18 @@ Simulation output is generated in 2022HPCSummer-TCPGlobalSynchronization/output
 # Plotting
 
 Install gnuplot
+```
+sudo apt install gnuplot
+```
 
+Plot the output data using the provided example script
 ```
 gnuplot -c example-plot.gp 3
 ```
 
-### Testing synchronization
+## Testing synchronization
 You should see the following output:
+
 plot-rate.png
 
 plot-point.png
@@ -199,10 +206,17 @@ plot-point.png
 plot-avg.png
 
 
-### Testing no synchronization
+## Testing no synchronization
 You should see the following output:
+
 plot-rate.png
+
+![](plot-rate-false.png)
 
 plot-point.png
 
+![](plot-point-false.png)
+
 plot-avg.png
+
+![](plot-avg-false.png)
