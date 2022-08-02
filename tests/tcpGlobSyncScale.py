@@ -40,6 +40,8 @@ receiver.addParams(
         "verbose_level": "1",  # level of console verbosity.
         "num_nodes": f"{NUM_SENDERS}",  # number of nodes that will connect to receiver.
         "window_size": "100",  # window size (in sim time) for global sync detection.
+        "run_time": "300",  # Number of cycles the simulation will run.
+        "enable_pred": "0",  # Enable pseudo-red dropping policy to prevent sychronization.
     }
 )
 

@@ -77,7 +77,8 @@ public:
         {"queue_size", "Size of queue", "50"},
         {"verbose_level", "Verbosity level for console output", "1"},
         {"num_nodes", "Number of nodes connected to receiver", "1"},
-        {"window_size", "Amount of ticks in which the number of sender nodes that transmission rates are reset occur.", "1"}, 
+        {"window_size", "Amount of ticks in which the number of sender nodes that transmission rates are reset occur.", "1"},
+        {"run_time", "Number of cycles the simulation will run.", "300"},
         {"enable_pred", "Enable psuedo-red dropping policy to prevent global synchronization.", "0"},
     )
 
@@ -101,6 +102,7 @@ private:
     int verbose_level;  //!< Verbosity level of console output.
     int num_nodes;      //!< Number of connected senders.
     int num_resets;     //
+    int64_t run_time;       //!< Number of cycles the simulation will run.
 
     float link_utilization;     //!< Aggregate link utilization of the receiver.
     float packets_processed;    //!< Packets processed per tick.

@@ -13,6 +13,7 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     num_nodes = params.find<int64_t>("num_nodes", 1);
     window_size = params.find<int64_t>("window_size", 100);
     enable_pred = params.find<int64_t>("enable_pred", 0);
+    run_time = params.find<int64_t>("run_time", 300);
 
     // Enabling SST Console Output
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT);
@@ -50,6 +51,7 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     packets_processed = 0;
     link_utilization = 0;
 
+    // Variables for global synchronization detection
     num_globsync = 0;
     prev_globsync_time = 0;
     new_globsync_time = 0;
@@ -102,7 +104,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     // Data output and File output
     output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\nCurrent Sim Time: %ld\n", 
         getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect, getCurrentSimTimeMilli());
-    output.verbose(CALL_INFO, 1, 0, "Number of times behavior has occured: %d\nDifference in time between last two detection: %f\nAverage difference in time between detections: %f\n",
+    output.verbose(CALL_INFO, 1, 0, "Number of times behavior has occured: %d\nDifference in time between last two detection: %f\nAverage difference in time between detections: %f\n\n",
         num_globsync, new_globsync_time - prev_globsync_time, globsync_time_diff_avg);
     csvout.output("%ld,%ld,%d,%f,%f,%f,%d,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg, num_globsync, globsync_time_diff_avg, metric_variance);
     output.output(CALL_INFO, "Queue Average: %f, Prev Queue Average: %f\n", queue_avg, prev_avg);
@@ -143,7 +145,7 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
         globsync_detect = 0;
     }
 
-    if (currentCycle == 1000) {
+    if (currentCycle == run_time) {
         primaryComponentOKToEndSim();
         return(true);
     }
