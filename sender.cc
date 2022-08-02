@@ -6,16 +6,14 @@ sender::sender( SST::ComponentId_t id, SST::Params& params ) : SST::Component(id
 
     // Parameters
     clock = params.find<std::string>("tickFreq", "1s");
-    low_send_rate = params.find<int64_t>("low_send_rate", 10);
+    min_send_rate = params.find<int64_t>("min_send_rate", 10);
     max_send_rate = params.find<int64_t>("max_send_rate", 100);
     verbose_level = params.find<int64_t>("verbose_level", 1);
     node_id = params.find<int64_t>("node_id", 0);
     starting_cycle = params.find<int64_t>("starting_cycle", 1); 
 
     // Variables
-    curr_send_rate = low_send_rate - 1;
-    counter = 0;
-    drop_counter = 0;
+    curr_send_rate = min_send_rate - 1;
     send_delay = 0;
  
     // Enabling SST Console Output
@@ -90,15 +88,9 @@ void sender::eventHandler(SST::Event *ev) {
             case LIMIT:
                 output.verbose(CALL_INFO, 2, 0, "Packets were dropped. Limiting transmission rate\n");
 
-                curr_send_rate = low_send_rate; // Limit transmission rate
+                curr_send_rate = min_send_rate; // Limit transmission rate
                 
                 port->send(new PacketEvent(pe->pack));
-                // Start delay?
-                // Statistic when node dropped a packet.
-                //^^^std::cout << node_id << ":" << getCurrentSimTimeMilli() << ":" << 1 << std::endl;
-                //^^^std::cout << getCurrentSimTimeMilli() << std::endl;
-                //rate_drop[drop_counter] = getCurrentSimTime();
-                //drop_counter++;
         }
     }
     delete ev; // Delete event to avoid memory leaks.
@@ -109,8 +101,6 @@ void sender::sendPacket(int id, int delay) {
     PacketType type = PACKET;
     Packet packet = { type, id, node_id};
 
-    // *tc is defined only in the header but it appears to be initialized by SST. 
-    //  send() did not work as intended when overloaded with two parameters (i.e. send(delay, event))
-    //  so tc was added and functionality worked as intended (adding 1ms of send delay).
+    // <<< COMMENTING >>>
     port->send(delay, delay_tc, new PacketEvent(packet));
 }

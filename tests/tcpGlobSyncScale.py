@@ -22,7 +22,7 @@ for x in range(NUM_SENDERS):
     senders[f"sender_{x}"].addParams(
         {
             "tickFreq": "1s",  # frequency component updates at.
-            "low_send_rate": "1",  # Minimum number of packets sent per second.
+            "min_send_rate": "1",  # Minimum number of packets sent per second.
             "max_send_rate": "50",  # Maximum number of packets set per second.
             "verbose_level": "1",  # Verbosity level of console output.
             "node_id": f"{x}",  # ID of sender node.

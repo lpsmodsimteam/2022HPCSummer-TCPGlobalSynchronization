@@ -83,7 +83,6 @@ private:
 
     SST::Link *port;        //!< Pointer to component's port. 
     SST::TimeConverter *delay_tc; //!< Required to convert sim time and component time.
-    SST::TimeConverter *tc;
 
     /**
      * @brief Constructs and sends a packet out the sender's port.
@@ -93,11 +92,6 @@ private:
      */
     inline void sendPacket(int id, int delay);  
 
-    int send_rate_data[300];
-    int counter = 0;
-    int drop_counter = 0;
-    int rate_drop[1000];
-
     std::string clock;      //!< Frequency component will tick at. Takes in Unit Algebra string (i.e. "1ms").
     int low_send_rate;      //!< Starting rate and what sender will lower transmission rate to during packet loss. 
     int max_send_rate;      //!< Maximum transmission rate of a node. 
@@ -106,7 +100,6 @@ private:
     int verbose_level;      //!< Console output verbosity level. 
     int node_id;            //!< User defined component ID in simulation. 
     int starting_cycle;     //!< The cycle the node begins transmitting packets at. 
-
     int stat_window_size;   //!< Window size for measuring transmission resets.
     int send_delay;         //!< Packet sending delay. 
 };

@@ -112,8 +112,7 @@ private:
     int sampling_start_time;    //!< Simulator Time in which sampling occurs. 
     bool sampling_status;       //!< Is sampling occuring or not.
     bool already_sampled;       //!< Determines if the behavior has already been detected before the window size is reached.
-    //int tracked_nodes[NUM_NODES]; //!!!! DYNAMICALLY ALLOCATE>
-    int *tracked_nodes;
+    int *tracked_nodes;         //!< Array that keeps track of what sender components have limited their transmission rates during a window of time.
     int nodes_limited;          //!< Number of nodes that have limited their transmission rate in a window.
     float globsync_detect;      //!< Metric if the global synchronization behavior has occured.
 

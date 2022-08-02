@@ -18,8 +18,6 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     // Enabling SST Console Output
     output.init(getName() + "->", verbose_level, 0, SST::Output::STDOUT);
 
-    output.output("%d", queue_size);
-
     // Enabling SST File Output
     csvout.init("CSVOUT", 1, 0, SST::Output::FILE, "output/receiver_data.csv");
     csvout.output("Time,Queue Size,Packet Loss,Link Utilization,Global Sync Detected,Average Queue Depth,Times Problem Detected,Average Time Difference between Problem,Variance of Time Difference\n");
@@ -37,7 +35,7 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     nodes_limited = 0;
     globsync_detect = 0;
     
-    //WRED Stuff
+    // Variables for custom dropping policy.
     queue_avg = 0;
     prev_avg = 0;
     rand_num = 0;
@@ -97,20 +95,18 @@ void receiver::finish() {
 }
  
 bool receiver::tick( SST::Cycle_t currentCycle ) {
-    output.verbose(CALL_INFO, 2, 0, "SimTime: %ld\n", getCurrentSimTime());
-    output.verbose(CALL_INFO, 2, 0, "Queue Size: %ld\n", msgQueue.size());
-    output.verbose(CALL_INFO, 2, 0, "Global Synchronization Detected: %f\n\n", globsync_detect);
    
     // Data output and File output
     output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\nCurrent Sim Time: %ld\n", 
         getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect, getCurrentSimTimeMilli());
-    output.verbose(CALL_INFO, 1, 0, "Number of times behavior has occured: %d\nDifference in time between last two detection: %f\nAverage difference in time between detections: %f\n\n",
-        num_globsync, new_globsync_time - prev_globsync_time, globsync_time_diff_avg);
-    csvout.output("%ld,%ld,%d,%f,%f,%f,%d,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg, num_globsync, globsync_time_diff_avg, metric_variance);
-    output.output(CALL_INFO, "Queue Average: %f, Prev Queue Average: %f\n", queue_avg, prev_avg);
 
+    output.verbose(CALL_INFO, 1, 0, "Number of times behavior has occured: %d\nDifference in time between last two detection: %f\nAverage difference in time between detections: %f\n\n", num_globsync, new_globsync_time - prev_globsync_time, globsync_time_diff_avg);
+
+    csvout.output("%ld,%ld,%d,%f,%f,%f,%d,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg, num_globsync, globsync_time_diff_avg, metric_variance);
+
+    // <<<COMMENT>>>
     if (sampling_status == true && (getCurrentSimTimeMilli() >= sampling_start_time + window_size)) {
-        output.verbose(CALL_INFO, 2, 0, "Ending Sampling-----------------------------------------------\n");
+        output.verbose(CALL_INFO, 2, 0, "Ending Sampling\n");
         already_sampled = false;
         sampling_status = false; 
         sampling_start_time = 0;
@@ -135,16 +131,11 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
     link_utilization = packets_processed / (float) process_rate;
     packets_processed = 0;
 
-    // Data output and File output
-    //output.verbose(CALL_INFO, 1, 0, "SimTime: %ld\nQueue Size: %ld\nPacket Loss: %d\nLink Utilization: %f\nGlobal Sync Behavior Detected: %f\n\n", 
-    //    getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization*100), globsync_detect);
-    //csvout.output("%ld,%ld,%d,%f,%f,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, queue_avg);
-    //output.output(CALL_INFO, "Queue Average: %f, Prev Queue Average: %f\n", queue_avg, prev_avg);
-
     if (globsync_detect) {
         globsync_detect = 0;
     }
 
+    // End simulation at user-defined time.
     if (currentCycle == run_time) {
         primaryComponentOKToEndSim();
         return(true);
@@ -158,33 +149,11 @@ void receiver::eventHandler(SST::Event *ev) {
     if (pe != NULL) {
         switch (pe->pack.type) {
             case PACKET:
-                count_pred++; 
+                //count_pred++; 
                 output.verbose(CALL_INFO, 3, 0, "Received msg from %d\n", pe->pack.node_id);
+                // CUSTOM QUEUE DROPPING POLICY.
                 if (enable_pred) {
-                    /**queue_avg = prev_avg + (msgQueue.size() - prev_avg) / pow(2, 6);
-                    prev_avg = queue_avg;
-                    
-                    if (queue_avg < min_pred) {
-                        msgQueue.push(pe->pack);
-                    } else if (queue_avg < queue_size) {
-                       rand_num = (int) (rng->generateNextInt32());
-                       int test = queue_size - msgQueue.size();
-                       rand_num = abs((int)rand_num % test);
-                        if (rand_num == 0) {
-                                output.output("Dropped\n");
-                                Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
-                                port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
-                                packet_loss++;
-                                count_pred = 0;
-                        } else {
-                           msgQueue.push(pe->pack);
-                        }
-                    } else {
-                        Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
-                        port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
-                        packet_loss++; 
-                        count_pred = 0;
-                    }*/
+                    count_pred++; 
 
                     if (msgQueue.size() <= min_pred) {
                         msgQueue.push(pe->pack);
@@ -213,8 +182,9 @@ void receiver::eventHandler(SST::Event *ev) {
                         packet_loss++;
                         count_pred = 0;
                     }
-                    //output.output("Average Queue Depth: %f\n", queue_avg);
-                } else {
+                } 
+                // TAIL DROP QUEUE DROPPING POLICY
+                else {
                     // Check if queue is full
                     if (msgQueue.size() + 1 > queue_size) {
                         // If so, drop the packet.
@@ -234,50 +204,38 @@ void receiver::eventHandler(SST::Event *ev) {
                 // Receives message that rates are limited, 
                 // Begins sampling for other transmission rate limiting in the user defined window time.
                 if (sampling_status == false && already_sampled == false) {
-                    output.verbose(CALL_INFO, 2, 0, "Started Sampling. Packet Loss from %d--------------------------------------\n", pe->pack.node_id);
+                    output.verbose(CALL_INFO, 2, 0, "Started Sampling. Packet Loss from %d\n", pe->pack.node_id);
+
                     sampling_start_time = getCurrentSimTimeMilli(); // Begin Window of Time
                     sampling_status = true; // Start sampling.
-                    tracked_nodes[pe->pack.node_id] = 1;
+                    tracked_nodes[pe->pack.node_id] = 1; 
                     nodes_limited++;
                 } 
 
+                // If currently sampling, and the node that has limited its transmission rate is new, enter loop.
                 if (sampling_status == true && tracked_nodes[pe->pack.node_id] == 0 && already_sampled == false) {
-                    output.verbose(CALL_INFO, 2, 0, "Currently Sampling: Packet Loss from %d\n-----------------------------------", pe->pack.node_id);
+                    output.verbose(CALL_INFO, 2, 0, "Currently Sampling: Packet Loss from %d\n", pe->pack.node_id);
+
                     tracked_nodes[pe->pack.node_id] = 1;
                     nodes_limited++; 
-                    if (nodes_limited == num_nodes) {
-                        output.verbose(CALL_INFO, 2, 0, "Ending Sampling Early\n--------------------------------------------");
 
-                        /**
-                        // If this is the first detection
-                        if (prev_globsync_time == 0) {
-                            prev_globsync_time = 0; 
-                        } else {
-                            // Order of operations is vital here.
-                            new_globsync_time = getCurrentSimTimeMilli();
-                            output.output("New: %f, Prev: %f", new_globsync_time, prev_globsync_time);
-                            num_globsync++;
-                            globsync_time_diff_avg = (globsync_time_diff_avg + (new_globsync_time - prev_globsync_time)) / num_globsync; 
-                            prev_globsync_time = new_globsync_time;
-                        } */
+                    if (nodes_limited == num_nodes) {
+                        output.verbose(CALL_INFO, 2, 0, "Ending Sampling Early\n");
 
                         new_globsync_time = getCurrentSimTimeMilli();
-                        output.output("New: %f, Prev: %f---------------------\n", new_globsync_time, prev_globsync_time);
                         num_globsync++;
-                        output.output("Number of glob syncs: %d\n", num_globsync);
-                        output.output("Globsync time diff avg: %f\n", globsync_time_diff_avg);
                         if (num_globsync != 1) { 
                             globsync_time_diff_avg = (total_time_diff + (new_globsync_time - prev_globsync_time)) / (num_globsync - 1); 
                             total_time_diff = total_time_diff + (new_globsync_time - prev_globsync_time);
                             metric_middle = (new_globsync_time - prev_globsync_time) - globsync_time_diff_avg;
-                            output.output("Metric middle: %f\n", metric_middle);
                             metric_variance = (metric_middle * metric_middle) / num_globsync - 1;
                         } 
                         prev_globsync_time = new_globsync_time;
-
                         globsync_detect = 1; 
                         already_sampled = true; 
                         nodes_limited = 0;
+
+                        // Reset tracked nodes to zero.
                         for (int i = 0; i < num_nodes; i++) {
                             tracked_nodes[i] = 0;
                         }
