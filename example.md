@@ -5,7 +5,7 @@ git clone https://github.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization.gi
 cd 2022HPCSummer-TCPGlobalSynchronization/tests
 
 Copy the following parameters into tcpGlobSync.py:
-'''
+```
 # Reference: http://sst-simulator.org/SSTPages/SSTUserPythonFileFormat/
 
 import sst  # Use SST Library
@@ -74,13 +74,13 @@ receiver.addParams(
 sst.Link("Link_Zero").connect((sender_zero, "port", "1ms"), (receiver, "port0", "1ms"))
 sst.Link("Link_One").connect((sender_one, "port", "1ms"), (receiver, "port1", "1ms"))
 sst.Link("Link_Two").connect((sender_two, "port", "1ms"), (receiver, "port2", "1ms"))
-'''
+```
 
 # Running
 
-'''
+```
 make
-'''
+```
 
 Simulation output is generated in 2022HPCSummer-TCPGlobalSynchronization/output
 
@@ -88,6 +88,6 @@ Simulation output is generated in 2022HPCSummer-TCPGlobalSynchronization/output
 
 Install gnuplot
 
-'''
+```
 gnuplot -c plot.gp 3
-'''
+```
