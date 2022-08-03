@@ -205,6 +205,8 @@ gnuplot -c example-plot.gp 3
 ## Testing synchronization
 You should see the following output (click to expand):
 
+## TODO: re-run and fix these graphs
+
 plot-rate.png
 
 <img src ="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-rate-sync.png" width="720">
