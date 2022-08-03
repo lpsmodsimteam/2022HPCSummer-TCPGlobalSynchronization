@@ -1,5 +1,7 @@
 \documentclass{article}
 
+\newcommand{\plotsize}{0.25}
+
 %graphics
 \usepackage{graphicx}
 \graphicspath{{./images/}}
@@ -153,59 +155,63 @@ The model involves a receiver component that has \textit{n} ports which connect 
 
 \section{Result} % conclusion/summary
 
-The metric capable of detecting TCP global synchronization is to look at the time in which senders limit their transmission rates.
+The metric capable of detecting TCP global synchronization is to first look at the time in which senders limit their transmission rates. If all senders limit their transmission rates in a window of time, the time in which this behavior occurred is logged. The difference in time between these points is calculated and averaged resulting in the metric.
 
-\color{red} Average time difference between synchronization rate limits is now a metric, include graphs and edit section.
-
-\color{black}
-Global synchronization occurs when all senders limit their transmission rate at around the same time. Measuring the number of senders that limit their transmission rate in a window of time appears to be the most accurate and precise measurement for detecting global synchronization.
+%Global synchronization occurs when all senders limit their transmission rate at around the same time. Measuring the number of senders that limit their transmission rate in a window of time appears to be the most accurate and precise measurement for detecting global synchronization.
 						
-In the simulation, the receiver component measures this behavior. The receiver will monitor the sender connected to it. When a sender limits its transmission rates, the receiver will begin sampling input for a window of time. If all sender limit their transmission rates in the window, the problem's behavior is detected in the simulation. This metric is demonstrated on three simulations which simulate three different scenarios of network traffic:
+In the simulation, the receiver component measures this behavior. The receiver will monitor the senders connected to it. When a sender limits its transmission rates, the receiver will begin sampling input for a window of time. If all sender limit their transmission rates in the window, the problem's behavior is detected in the simulation. This metric is demonstrated on three simulations which simulate three different scenarios of network traffic:
 											
 The first simulation is of three senders that have a combined transmission rate that is under the receiver's \href{https://www.solarwinds.com/resources/it-glossary/network-capacity}{capacity}. The receiver's queue will not fill so packet loss will not occur, and senders will not limit their transmission rates; see Figure \ref{fig:good-rate}. In this scenario, global synchronization is not occurring so the metric will not detect this behavior in the simulation; see Figure \ref{fig:good-metric}.
 	
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.50]{good-rate}
-	\caption{ \color{red} CHANGE LINE TYPES Transmission rates of the three senders. Transmission rate limiting does not occur so global synchronization is not detected.}
+	\includegraphics[scale=\plotsize]{new-good-rate}
+	\caption{Transmission rates of the three senders. Transmission rate limiting does not occur so global synchronization is not detected.}
 	\label{fig:good-rate}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{good-metric}
-	\caption{Metric does not detect the existence of global synchronization in simulation one.}
+	\includegraphics[scale=\plotsize]{new-good-point}
+	\caption{Global Synchronization is not detected in simulation one.}
 	\label{fig:good-metric}
 \end{figure}
 
-The second simulation contains two senders that send packets to a receiver at a rate in which the queue does not fill up so packet loss can not occur. A third client is introduced after one hundred seconds and disrupts the network by sending packets which causes the queue to fill and packets to be dropped. All clients send packages consecutively when the packet loss occurs so they all encounter packet loss and limit their transmission rates consecutively; see Figure \ref{fig:bad-rate}. This creates the problem of global synchronization as they attempt to increase their transmission rates back over time which leads to more packet loss and rate limiting. In this scenario, global synchronization occurs and the metric detects it; see Figure \ref{fig:bad-metric}.
+The second simulation contains two senders that send packets to a receiver at a rate in which the queue does not fill up so packet loss can not occur. A third client is introduced after one hundred seconds and disrupts the network by sending packets which causes the queue to fill and packets to be dropped. All clients send packages consecutively when the packet loss occurs so they all encounter packet loss and limit their transmission rates consecutively; see Figure \ref{fig:bad-rate}. This creates the problem of global synchronization as they attempt to increase their transmission rates back over time which leads to more packet loss and rate limiting. In this scenario, global synchronization occurs and the metric detects it; see Figure \ref{fig:bad-metric}. The difference in time between each pairs of points is calculated and the average is calculated for all points in the simulation output; see Figure \ref{fig:bad-avg}.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{bad-rate}
-	\caption{ \color{red} CHANGE LINE TYPES.Transmission rates of the three senders over time.}
+	\includegraphics[scale=\plotsize]{new-bad-rate}
+	\caption{Transmission rates of the three senders over time.}
 	\label{fig:bad-rate}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{bad-metric}
+	\includegraphics[scale=\plotsize]{new-bad-point}
 	\caption{Metric detecting the existence of the problem in simulation two.}
 	\label{fig:bad-metric}
-\end{figure}	
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=\plotsize]{new-bad-avg}
+	\caption{Average difference in time between global synchronized rate limiting during simulation runtime.}
+	\label{fig:bad-avg}
+\end{figure}		
 
 The third simulation contains the same parameters as simulation two. However, a simple algorithm inspired by \href{https://en.wikipedia.org/wiki/Random_early_detection}{Random Early Detection} (RED) is incorporated into the simulation to prevent global synchronization from occurring. This algorithm runs every time the receiver receives a packet and works by dropping random packets after the queue size becomes greater than user-defined size. This will cause senders to limit their transmission rates early and and at random intervals; see Figure \ref{fig:rand-rate}. This is used to demonstrate the metric in an environment where global synchronization could potentially occur but does not. This is to test if the metric can produce false positives; see Figure \ref{fig:rand-metric}.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{rand-rate}
-	\caption{\color{red} CHANGE LINE TYPES Transmission rates of the three senders over time.}
+	\includegraphics[scale=\plotsize]{new-rand-rate}
+	\caption{Transmission rates of the three senders over time.}
 	\label{fig:rand-rate}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{rand-metric}
+	\includegraphics[scale=\plotsize]{new-rand-nodetect}
 	\caption{Metric does not detect global synchronization in simulation three.}
 	\label{fig:rand-metric}
 \end{figure}
@@ -214,17 +220,27 @@ Expanding the window size for sampling will cause the metric to produce false po
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{falpos-rate}
-	\caption{\color{red} CHANGE LINE TYPES Simulation where all transmission rates are limited within a window of around 30 seconds}
+	\includegraphics[scale=\plotsize]{new-rand-rate}
+	\caption{Transmission rates of the three senders over time.}
 	\label{fig:falpos-rate}
-\end{figure}		
+\end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{falpos-metric}
-	\caption{A large window size (forty seconds) causes the metric to produce false-positives.}
+	\includegraphics[scale=\plotsize]{new-rand-point}
+	\caption{A large window size (forty seconds) causes false positives in detection.}
 	\label{fig:falpos-metric}
 \end{figure}
+
+Notice that taking the time difference between consecutive detection points and averaging them shows fluctuation; see Figure \ref{fig:falpos-avg}. This is useful to differentiate false positives from true positives where the average time difference is constant after the first two detections; see Figure \ref{fig:bad-avg}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=\plotsize]{new-rand-avg}
+	\caption{Average time between detection points fluctuates during a false positive.}
+	\label{fig:falpos-avg}
+\end{figure}
+
 
 The metric results from an algorithm ran during the simulation, so it can be analyzed or used during runtime. The data it produces is also output to a log file for analysis after the simulation has ended.
 
@@ -291,6 +307,20 @@ void receiver::eventHandler(SST::Event *ev) {
 		
 		// Check if all seperate senders have limited their transmission rates in the sampling window time.
 		if (senders_limited == num_nodes) {
+			// Global sychronization behavior has occured.
+			
+			// Log time sychronization was detected
+			new_globsync_time = getCurrentSimTimeMilli();
+			num_globsync++; // Increment count of detections
+			
+			// For detections after the first one, take the difference in times between detection points and average them.
+			if (num_globsync != 1) { 
+				globsync_time_diff_avg = (total_time_diff + (new_globsync_time - prev_globsync_time)) / (num_globsync - 1); 
+				total_time_diff = total_time_diff + (new_globsync_time - prev_globsync_time);
+			} 
+			
+			prev_globsync_time = new_globsync_time;
+
 			globsync_detect = 1;	// Set boolean metric to true.
 			already_sampled = true;		// End sampling early.
 			
@@ -308,11 +338,9 @@ void receiver::eventHandler(SST::Event *ev) {
 													
 \section{Future Work}
 
-Currently, the metric detects a time when the behavior for global synchronization is occurring but it may not necessarily mean the problem exist in a network. Queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{Weighted Random Early Detection} (WRED) or RED attempts to avoid global synchronization by randomizing when senders limit their transmission rates based on the average queue size of the receiver. However, if their is a burst of traffic in the network and the receiver's average queue size is larger than a maximum threshold, packet loss can occur for all connected senders and they will synchronously limit transmission rates. If WRED was used in a simulation, the current metric could potentially report that global synchronization is occurring but it would be in randomly spaced intervals unlike what is shown in Figure \ref{fig:bad-metric}.
+Increasing the fidelity of the simulation and comparing if the detection metric is still accurate should be tried. Examples include incorporating sliding window protocol, different queue dropping policies, and traffic prioritization.
 
-\color{red} THE IDEA BELOW IS NOW IMPLEMENTED, INCLUDE NEW GRAPHS AND CHANGE FUTURE WORK
-\color{black}
-A more accurate metric will be to keep track of the time in which the behavior is detected and subtract it with the last time the behavior was detected. This will give the interval of time between the detection of global synchronization in the network. If this is repeated and the interval of time between detection remains constant then global synchronization is occurring in the network.
+%Currently, the metric detects a time when the behavior for global synchronization is occurring but it may not necessarily mean the problem exist in a network. Queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{Weighted Random Early Detection} (WRED) or RED attempts to avoid global synchronization by randomizing when senders limit their transmission rates based on the average queue size of the receiver. However, if their is a burst of traffic in the network and the receiver's average queue size is larger than a maximum threshold, packet loss can occur for all connected senders and they will synchronously limit transmission rates. If WRED was used in a simulation, the current metric could potentially report that global synchronization is occurring but it would be in randomly spaced intervals unlike what is shown in Figure \ref{fig:bad-metric}.
 
 % if the above is implemented, then the problem becomes what if network traffic is too much for the receiver to handle?
 % wred and red will both have average queue size above threshold consistently which would cause global sync behavior

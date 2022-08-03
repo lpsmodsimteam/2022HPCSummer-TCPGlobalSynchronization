@@ -21,7 +21,7 @@ path_data = "output/" # Change to where data is stored. (output/ by default)
 set output "plot-rate.png"
 set title "Transmission Rates of Senders over Simulation Time"
 set ylabel "Packets Sent Per Tick"
-plot path_data."sender_data0.csv" using 1:2 title "Sender-0" with lines lw 5 lt rgb "#ff0067" dashtype 1, path_data."sender_data1.csv" using 1:2 title "Sender-1" with lines lt rgb "#0000ff" lw 5 dashtype 4, path_data."sender_data2.csv" using 1:2 title "Sender-2" with lines dashtype 5 lt rgb "#ffa600" lw 5
+plot path_data."sender_data0.csv" using 1:2 title "Sender-0" with lines lw 6 lt rgb "#ff0067" dashtype 1, path_data."sender_data1.csv" using 1:2 title "Sender-1" with lines lt rgb "#0000ff" lw 6 dashtype 1, path_data."sender_data2.csv" using 1:2 title "Sender-2" with lines dashtype 1 lt rgb "#ffa600" lw 6
 
 set output "plot-point.png"
 set title "Global Synchronization Detection"
@@ -32,7 +32,7 @@ set output "plot-avg.png"
 set title "Global Synchronization Detection"
 set xlabel "Number of Times Sychronized Rate Limiting is Detected."
 set ylabel "Average Time Difference (ms)"
-plot path_data."receiver_data.csv" using 6:7 title "Average Time Difference between Detection Points" with lines lw 5
+plot path_data."receiver_data.csv" using 6:7 title "Average Time Difference between Detection Points" with lines lw 6
 
 
 

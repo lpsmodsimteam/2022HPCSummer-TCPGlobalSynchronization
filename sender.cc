@@ -91,7 +91,7 @@ void sender::eventHandler(SST::Event *ev) {
 
                 curr_send_rate = min_send_rate; // Limit transmission rate
                 
-                port->send(new PacketEvent(pe->pack));
+                port->send(new PacketEvent(pe->pack)); // Let receiver know that sending rate has been limited.
         }
     }
     delete ev; // Delete event to avoid memory leaks.
@@ -102,6 +102,9 @@ void sender::sendPacket(int id, int delay) {
     PacketType type = PACKET;
     Packet packet = { type, id, node_id};
 
-    // <<< COMMENTING >>>
+    // Sends packet at a offset of delay * delay_tc where delay is an integer 
+    // and delay_tc is UnitAlgebra (i.e. 1ms). This delays packets being sent
+    // so the receiver will receive one packet from each sender before receiving
+    // the next set of packets.
     port->send(delay, delay_tc, new PacketEvent(packet));
 }

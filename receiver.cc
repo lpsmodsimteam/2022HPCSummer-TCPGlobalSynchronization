@@ -53,7 +53,7 @@ receiver::receiver( SST::ComponentId_t id, SST::Params& params ) : SST::Componen
     new_globsync_time = 0;
     globsync_time_diff_avg = 0;
     total_time_diff = 0;
-    metric_middle = 0;
+    //metric_middle = 0;
 
     // Pointer to an array of port pointers.
     port = new SST::Link*[num_nodes];
@@ -152,27 +152,34 @@ void receiver::eventHandler(SST::Event *ev) {
                 if (enable_pred) {
                     count_pred++; 
 
+                    // If queue size is below minimum threshold, enqueue the packet
                     if (msgQueue.size() <= min_pred) {
                         msgQueue.push(pe->pack);
                     }
 
+                    // If queue size is above the minimum threshold...
                     if (msgQueue.size() > min_pred) {
-                        if (count_pred > 250) {
-                            //try for drop
+                        // and the receiver has received more than 250 packets since the last drop.
+                        if (count_pred > queue_size) {
+
+                            // randomize for drop
                             rand_num = (float) (rng->nextUniform());
                             if (rand_num < 0.30) {
-                                output.output(CALL_INFO, "DROPPED EARLY----------------------\n");
                                 Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
                                 port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
                                 packet_loss++;
                                 count_pred = 0;
+                            } else {
+                                // enqueue
+                                msgQueue.push(pe->pack);
                             }
                         } else {
                             //just enqueue
                             msgQueue.push(pe->pack);
                         }
                     }
-
+                    
+                    // If queue is full, drop packet.
                     if (msgQueue.size() + 1 > queue_size) {
                         Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
                         port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
@@ -216,16 +223,19 @@ void receiver::eventHandler(SST::Event *ev) {
                     tracked_nodes[pe->pack.node_id] = 1;
                     nodes_limited++; 
 
+                    // Check if all senders have limited their send rates in the sampling window of time.
                     if (nodes_limited == num_nodes) {
                         output.verbose(CALL_INFO, 2, 0, "Ending Sampling Early\n");
 
+                        // Global synchronized rate limiting detected.
                         new_globsync_time = getCurrentSimTimeMilli();
                         num_globsync++;
                         if (num_globsync != 1) { 
                             globsync_time_diff_avg = (total_time_diff + (new_globsync_time - prev_globsync_time)) / (num_globsync - 1); 
                             total_time_diff = total_time_diff + (new_globsync_time - prev_globsync_time);
-                            metric_middle = (new_globsync_time - prev_globsync_time) - globsync_time_diff_avg;
+                            //metric_middle = (new_globsync_time - prev_globsync_time) - globsync_time_diff_avg;
                         } 
+                        
                         prev_globsync_time = new_globsync_time;
                         globsync_detect = 1; 
                         already_sampled = true; 

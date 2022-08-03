@@ -36,6 +36,11 @@ public:
      */
     bool tick ( SST::Cycle_t currentCycle );
 
+    /**
+     * @brief This is a required dummy function that ticks at what delay_clock is set to. This is necessary for delay_tc to function correctly when setting the delay inbetween packets being sent out.
+     * 
+     * @param currentCycle Current cycle of the component.
+     */
     bool dummy ( SST::Cycle_t currentCycle );
 
     /**

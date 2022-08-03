@@ -120,7 +120,7 @@ private:
     float new_globsync_time;        //!< The latest time synchronized rate limited has occured.
     float globsync_time_diff_avg;   //!< The different in time between the latest and previous time sychronized rate limiting has occured.
     int total_time_diff;            //!< Sum of every 
-    float metric_middle;
+    //float metric_middle;
     
     bool enable_pred;   //!< Enable psuedo-red algorithm to prevent global synchronization from occurring.
     float min_pred;     //!< Minimum threshold for pseudo-red algorithm.
