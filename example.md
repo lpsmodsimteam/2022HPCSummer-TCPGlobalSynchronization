@@ -230,4 +230,4 @@ plot-point.png
 
 plot-avg.png
 
-<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/6cd7a0ef19bdfc01e0f5f1e9ec20b8dd89f0e0b2/example_plots/plot-avg-false.png" width="720"/>
+<img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-avg-false.png" width="720"/>
