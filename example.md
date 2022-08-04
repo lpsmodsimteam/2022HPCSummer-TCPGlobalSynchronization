@@ -170,13 +170,15 @@ Prerequisites
 ```
 sudo apt install singularity black mypi
 git clone https://github.com/tactcomplabs/sst-containers.git
+```
+Follow the instructions in the git repo to build the container "sstpackage-11.1.0-ubuntu-20.04.sif".
+```
 cp sst-containers/singularity/sstpackage-11.1.0-ubuntu-20.04.sif /usr/local/bin/
 git clone https://github.com/lpsmodsim/2022HPCSummer-SST.git
-sudo . /2022HPCSummer-SST/additions.def.sh
+sudo ./2022HPCSummer-SST/additions.def.sh
 ```
 
 Running the model
-
 ```
 cd 2022HPCSummer-TCPGlobalSynchronization/
 make
