@@ -71,7 +71,7 @@ The challenge addressed by this work is to map the networking problem TCP Global
 
 \section{Motivation} % Why does this work matter? Who cares? If you're successful, what difference does it make?
 
-Identifying the metrics to detect TCP Global Synchronization will be vital for developing distributed systems that can avoid global synchronization from occurring during network communication. Network architects may be unaware of this problem when they begin to model and simulate a network. The metrics found in this research can help them catch this problem when they occur during the simulation's development. These results allow for the problem to be avoided during simulation so it does not occur when the system is put into production.
+Identifying the metrics to detect TCP Global Synchronization will be vital for developing distributed systems that can avoid global synchronization from occurring during network communication. Network architects may be unaware of this problem when they begin to model and simulate a network. Therefore, the metrics found in this research can help them catch this problem when they occur during the simulation's development. These results allow for the problem to be avoided during simulation so it does not occur when the system is put into production.
 
 A second outcome of this work is to develop examples and documentation of SST simulations that new users can utilize. Currently, SST is primarily used for \href{https://en.wikipedia.org/wiki/High-performance_computing}{High-Performance Computing} (HPC) simulations and the majority of SST examples revolve around modeling HPC systems. However, the SST framework utilizes a powerful discrete-event simulator that can model more than just HPC systems. The models and documentation created for this project show off the discrete-event simulator for simulations not relating to HPC systems.
 
@@ -200,7 +200,7 @@ The second simulation contains two senders that send packets to a receiver at a 
 	\label{fig:bad-avg}
 \end{figure}		
 
-The third simulation contains the same parameters as simulation two. However, a simple algorithm inspired by \href{https://en.wikipedia.org/wiki/Random_early_detection}{Random Early Detection} (RED) is incorporated into the simulation to prevent global synchronization from occurring. This algorithm runs every time the receiver receives a packet and works by dropping random packets after the queue size becomes greater than user-defined size. This will cause senders to limit their transmission rates early and and at random intervals; see Figure \ref{fig:rand-rate}. This is used to demonstrate the metric in an environment where global synchronization could potentially occur but does not. This is to test if the metric can produce false positives; see Figure \ref{fig:rand-metric}.
+The third simulation contains the same parameters as simulation two. However, a simple algorithm inspired by \href{https://en.wikipedia.org/wiki/Random_early_detection}{Random Early Detection} (RED) is incorporated into the simulation to prevent global synchronization from occurring. This algorithm runs every time the receiver receives a packet and works by dropping random packets after the queue size becomes greater than an user-defined size. This will cause senders to limit their transmission rates early and at random intervals; see Figure \ref{fig:rand-rate}. This is used to demonstrate the metric in an environment where global synchronization could potentially occur but does not. This is to test if the metric can produce false positives; see Figure \ref{fig:rand-metric}.
 
 \begin{figure}[H]
 	\centering
@@ -244,7 +244,7 @@ Notice that taking the time difference between consecutive detection points and 
 
 The metric results from an algorithm ran during the simulation, so it can be analyzed or used during runtime. The data it produces is also output to a log file for analysis after the simulation has ended.
 
-The algorithm is run on the receiver in the SST model but could be generalized to any node capable of collecting information on all senders that are connected to a receiver. The following \href{https://en.wikipedia.org/wiki/C%2B%2B}{C++} code snippets show the implementation of the algorithm that results in the metric:\newline
+The receiver component runs the algorithm in the SST model, but it could be generalized to any node capable of collecting information on all senders that are connected to a receiver. The following \href{https://en.wikipedia.org/wiki/C%2B%2B}{C++} code snippets show the implementation of the algorithm that results in the metric:\newline
 
 \noindent In the node's setup function:
 \begin{lstlisting}[language=C++, commentstyle=\fontfamily{fve}\selectfont\color{black}]
@@ -338,7 +338,7 @@ void receiver::eventHandler(SST::Event *ev) {
 													
 \section{Future Work}
 
-Increasing the fidelity of the simulation and comparing if the detection metric is still accurate should be tried. Examples include incorporating sliding window protocol, different queue dropping policies, and traffic prioritization.
+It would be useful to try increasing the fidelity of the simulation and comparing if the detection metric is still accurate. Examples include incorporating sliding window protocol, different queue dropping policies, and traffic prioritization.
 
 %Currently, the metric detects a time when the behavior for global synchronization is occurring but it may not necessarily mean the problem exist in a network. Queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{Weighted Random Early Detection} (WRED) or RED attempts to avoid global synchronization by randomizing when senders limit their transmission rates based on the average queue size of the receiver. However, if their is a burst of traffic in the network and the receiver's average queue size is larger than a maximum threshold, packet loss can occur for all connected senders and they will synchronously limit transmission rates. If WRED was used in a simulation, the current metric could potentially report that global synchronization is occurring but it would be in randomly spaced intervals unlike what is shown in Figure \ref{fig:bad-metric}.
 
