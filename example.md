@@ -220,6 +220,8 @@ plot-avg.png
 ## Testing no synchronization
 You should see the following output (click to expand):
 
+## TODO: re-run and fix these graphs
+
 plot-rate.png
 
 <img src ="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-rate-false.png" width="720">
