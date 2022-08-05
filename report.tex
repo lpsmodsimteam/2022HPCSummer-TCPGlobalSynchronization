@@ -74,7 +74,7 @@ Identifying the metrics to detect TCP Global Synchronization will be vital for d
 A second goal of this work is to develop examples and documentation of SST simulations that new users can utilize. Currently, SST is primarily used for \href{https://en.wikipedia.org/wiki/High-performance_computing}{High-Performance Computing} (HPC) simulations and the majority of SST examples revolve around modeling HPC systems. However, the SST framework utilizes a powerful discrete-event simulator that can model more than just HPC systems. The models and documentation created for this project show off the discrete-event simulator for simulations not relating to HPC systems.
 
 \section{Prior work} % what does this build on?
-Prior research by Bashi and Al-Hammouri \cite{Bashi2017} does not involve discovering metrics that can detect this problems existence in simulation; however, it was useful in understanding the problem and how different packet dropping policies create or reduce global synchronization.
+Prior research by Bashi and Al-Hammouri \cite{Bashi2017} explains in detail on how the global synchronization can occur in a network. The authors simulate network traffic to show synchronization occurring when all senders decrease their congestion window at the same time. Congestion window is the number of packets a sender will send before needing an acknowledgment. This information was used to create a simple SST model explained in this report that can detect if global synchronization is occurring by measuring the number of clients that limit their transmission rates in an interval of time.
 
 \section{Running the Model}
 
