@@ -15,7 +15,7 @@ This demonstration of global synchronization relies only on [SST-Core](https://g
 - [x] identify minimum size of graph (links, components) to observe the issue
 - [x] identify metrics needed to identify the existence of the problem
 - [x] measure the metrics and demonstrate the detection of the problem
-- [ ] use the metrics to identify the problem at various scales (e.g., 10 nodes, 100 nodes, 1000 nodes)
+- [x] use the metrics to identify the problem at various scales (e.g., 10 nodes, 100 nodes, 1000 nodes)
 
 # Context
 

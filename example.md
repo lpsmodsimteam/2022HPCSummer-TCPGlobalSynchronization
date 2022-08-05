@@ -205,7 +205,7 @@ gnuplot -c example-plot.gp 3
 ```
 
 ## Testing synchronization
-You should see the following output (click to expand):
+You will see the following output in 2022HPCSummer-TCPGlobalSynchronization/ (click to expand):
 
 plot-rate.png
 
@@ -222,8 +222,6 @@ plot-avg.png
 ## Testing no synchronization
 You should see the following output (click to expand):
 
-## TODO: re-run and fix these graphs
-
 plot-rate.png
 
 <img src ="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-rate-false.png" width="720">
@@ -235,3 +233,15 @@ plot-point.png
 plot-avg.png
 
 <img src="https://raw.githubusercontent.com/lpsmodsim/2022HPCSummer-TCPGlobalSynchronization/main/example_plots/plot-avg-false.png" width="720"/>
+
+# Generate Documentation
+
+```
+sudo apt install doxygen
+cd 2022HPCSummer-TCPGlobalSynchronization
+doxygen doxygen-conf
+```
+
+Doxygen documentation will be generated in 2022HPCSummer-TCPGlobalSynchronization/html 
+
+It can be accessed at 2022HPCSummer-TCPGlobalSynchronization/html/index.html

@@ -101,9 +101,11 @@ bool receiver::tick( SST::Cycle_t currentCycle ) {
 
     csvout.output("%ld,%ld,%d,%f,%f,%d,%f\n", getCurrentSimTime(), msgQueue.size(), packet_loss, (link_utilization * 100), globsync_detect, num_globsync, globsync_time_diff_avg);
 
-    // <<<COMMENT>>>
+    // If sampling and the window size has been reached, enter.
     if (sampling_status == true && (getCurrentSimTimeMilli() >= sampling_start_time + window_size)) {
         output.verbose(CALL_INFO, 2, 0, "Ending Sampling\n");
+
+        // End sampling
         already_sampled = false;
         sampling_status = false; 
         sampling_start_time = 0;
@@ -146,9 +148,11 @@ void receiver::eventHandler(SST::Event *ev) {
     if (pe != NULL) {
         switch (pe->pack.type) {
             case PACKET:
-                //count_pred++; 
                 output.verbose(CALL_INFO, 3, 0, "Received msg from %d\n", pe->pack.node_id);
+
                 // CUSTOM QUEUE DROPPING POLICY.
+                // Disclaimer: this was added for demonstration purposes and has been not tested to work on all types of input parameters.
+                // Future Work: Implement an actual queue dropping policy such as Random Early Dropping or Weighted Random Early Dropping
                 if (enable_pred) {
                     count_pred++; 
 
@@ -159,7 +163,7 @@ void receiver::eventHandler(SST::Event *ev) {
 
                     // If queue size is above the minimum threshold...
                     if (msgQueue.size() > min_pred) {
-                        // and the receiver has received more than 250 packets since the last drop.
+                        // and the receiver has received more than queue size number of packets since the last drop.
                         if (count_pred > queue_size) {
 
                             // randomize for drop
@@ -168,7 +172,7 @@ void receiver::eventHandler(SST::Event *ev) {
                                 Packet limitMsg = { LIMIT, pe->pack.id, pe->pack.node_id };
                                 port[limitMsg.node_id]->send(new PacketEvent(limitMsg));
                                 packet_loss++;
-                                count_pred = 0;
+                                count_pred = 0; // reset count to prevent packets from continously getting dropped.
                             } else {
                                 // enqueue
                                 msgQueue.push(pe->pack);
@@ -233,7 +237,6 @@ void receiver::eventHandler(SST::Event *ev) {
                         if (num_globsync != 1) { 
                             globsync_time_diff_avg = (total_time_diff + (new_globsync_time - prev_globsync_time)) / (num_globsync - 1); 
                             total_time_diff = total_time_diff + (new_globsync_time - prev_globsync_time);
-                            //metric_middle = (new_globsync_time - prev_globsync_time) - globsync_time_diff_avg;
                         } 
                         
                         prev_globsync_time = new_globsync_time;

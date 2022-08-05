@@ -119,13 +119,12 @@ private:
     float prev_globsync_time;       //!< The previous time synchronized rate limited has occured.
     float new_globsync_time;        //!< The latest time synchronized rate limited has occured.
     float globsync_time_diff_avg;   //!< The different in time between the latest and previous time sychronized rate limiting has occured.
-    int total_time_diff;            //!< Sum of every 
-    //float metric_middle;
+    int total_time_diff;            //!< Sum of every difference in time taken between two points of synchronization detection.
     
     bool enable_pred;   //!< Enable psuedo-red algorithm to prevent global synchronization from occurring.
     float min_pred;     //!< Minimum threshold for pseudo-red algorithm.
     int count_pred;     //!< Counter that counts incoming packets and determines when packet drop can occur again.
-    int64_t rand_seed;
+    int64_t rand_seed;  //!< Random seed for MarsagliaRNG.
     SST::RNG::MarsagliaRNG *rng;    //!< RNG for custom dropping algorithm.
     float rand_num;                 //!< Probability generated for dropping a packet after queue depth has reached a threshold. (min_pred)
 };
