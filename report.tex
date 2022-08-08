@@ -338,7 +338,7 @@ void receiver::eventHandler(SST::Event *ev) {
 													
 \section{Future Work}
 
-It would be useful to try increasing the fidelity of the simulation and comparing if the detection metric is still accurate. Examples include incorporating  \href{https://www.isi.edu/nsnam/DIRECTED_RESEARCH/DR_HYUNAH/D-Research/stop-n-wait.html}{stop-and-wait} or  \href{https://en.wikipedia.org/wiki/Sliding_window_protocol}{sliding window protocol}, different queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{WRED}, \href{https://en.wikipedia.org/wiki/TCP_congestion_control#Congestion_window}{congestion window}, and \href{https://flylib.com/books/en/2.809.1.54/1/}{traffic prioritization}.
+Future work includes increasing the fidelity of the simulation and comparing if the detection metric is still accurate. Examples include incorporating  \href{https://www.isi.edu/nsnam/DIRECTED_RESEARCH/DR_HYUNAH/D-Research/stop-n-wait.html}{stop-and-wait} or  \href{https://en.wikipedia.org/wiki/Sliding_window_protocol}{sliding window protocol}, different queue dropping policies such as \href{https://en.wikipedia.org/wiki/Weighted_random_early_detection}{WRED}, \href{https://en.wikipedia.org/wiki/TCP_congestion_control#Congestion_window}{congestion window}, and \href{https://flylib.com/books/en/2.809.1.54/1/}{traffic prioritization}.
 
 It would also be useful to explore measuring the receiver's queue for fluctuation/oscillation to determine if global synchronization is occurring. Queue oscillation was used to test for global synchronization in Bashi and Al-Hammouri's research \cite{Bashi2017} but was not measured in the SST model due to time constraints.
 
